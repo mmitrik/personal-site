@@ -27,7 +27,7 @@ export default function HomePage() {
       <header className="flex flex-col items-center justify-center text-center py-20 px-6">
         <h2 className="text-4xl font-extrabold mb-4">Welcome to My Personal Website</h2>
         <p className="text-lg text-gray-400 max-w-2xl">
-          Hi, I'm Matt, a passionate software developer specializing in building modern web applications. I love creating clean, efficient, and user-friendly solutions.
+          Hi, I&#39;m Matt, a passionate software developer specializing in building modern web applications. I love creating clean, efficient, and user-friendly solutions.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <Link href="/projects" className="px-6 py-3 bg-blue-600 text-white rounded-lg text-lg font-medium hover:bg-blue-500">
