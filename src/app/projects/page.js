@@ -2,9 +2,9 @@ import Link from "next/link";
 
 const projects = [
     {
-        title: "Project One",
-        description: "This is a short description of Project One.",
-        link: "/apps/project-one",
+        title: "Compliment Generator",
+        description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
+        link: "/apps/compliments",
     },
     {
         title: "Project Two",
