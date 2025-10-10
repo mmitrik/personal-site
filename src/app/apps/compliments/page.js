@@ -69,9 +69,9 @@ export default function ComplimentGenerator() {
                 </motion.div>
                 <motion.div
                     key={compliment}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                     <p className="text-xl font-semibold text-gray-800">{compliment}</p>
                 </motion.div>
