@@ -1,26 +1,113 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Colors */
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc; 
+  --color-text: #0f172a;
+  --color-muted: #475569;
+  --color-border: #e5e7eb;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  
+  /* Font families */
+  --font-family-heading: "Poppins", "Inter", sans-serif;
+  
+  /* Shadows */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- Global Resets & Customizations --- */
+
+html, body {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Typography tweaks */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  color: var(--color-text);
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+p {
+  color: var(--color-muted);
+  line-height: 1.625;
 }
+
+/* Link styles - only apply to links that aren't buttons or header logo */
+a:not(.btn):not(.btn-outline):not(.header-logo) {
+  color: var(--color-accent);
+  transition: color 0.15s ease-in-out;
+}
+
+a:not(.btn):not(.btn-outline):not(.header-logo):hover {
+  color: var(--color-accent-hover);
+}
+
+/* Header logo link styles */
+a.header-logo {
+  color: var(--color-text);
+  font-weight: 700;
+  transition: color 0.15s ease-in-out;
+}
+
+a.header-logo:hover {
+  color: var(--color-accent);
+}
+
+/* Button base styles */
+a.btn, .btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--color-accent);
+  transition: background-color 0.15s ease-in-out;
+  text-decoration: none;
+}
+
+a.btn:hover, .btn:hover {
+  color: white;
+  background-color: var(--color-accent-hover);
+}
+
+.btn-outline {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-outline:hover {
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+/* Card container for consistent layout sections */
+.card {
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* Custom utility classes for the design system */
+.bg-bg { background-color: var(--color-bg); }
+.bg-surface { background-color: var(--color-surface); }
+.bg-accent { background-color: var(--color-accent); }
+
+.text-text { color: var(--color-text); }
+.text-muted { color: var(--color-muted); }
+.text-accent { color: var(--color-accent); }
+
+.border-border { border-color: var(--color-border); }
+
+.font-heading { font-family: var(--font-family-heading); }
+
+.hover\:text-accent:hover { color: var(--color-accent); }
+.hover\:bg-accent-hover:hover { background-color: var(--color-accent-hover); }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Header from "../../components/Header";
 
 const projects = [
     {
@@ -20,22 +21,25 @@ const projects = [
 
 export default function ProjectsPage() {
     return (
-        <div className="min-h-screen bg-gray-900 text-white font-sans p-8">
-            <h1 className="text-4xl font-bold text-center mb-8">Projects</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project, index) => (
-                    <div
-                        key={index}
-                        className="bg-gray-800 shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow"
-                    >
-                        <h2 className="text-2xl font-semibold mb-2 text-white">{project.title}</h2>
-                        <p className="text-gray-400 mb-4">{project.description}</p>
-                        <Link href={project.link} className="text-blue-400 hover:text-blue-300">
-                            Open Project
-                        </Link>
+        <main className="min-h-screen bg-bg text-text">
+            <div className="max-w-4xl mx-auto p-8 pt-16">
+                <Header />
+
+                <section className="bg-surface p-10 rounded-2xl shadow-sm">
+                    <h1 className="text-4xl font-heading mb-8 text-center">Projects</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {projects.map((project, index) => (
+                            <div key={index} className="card">
+                                <h2 className="text-2xl font-heading mb-2">{project.title}</h2>
+                                <p className="text-muted mb-4">{project.description}</p>
+                                <Link href={project.link} className="btn">
+                                    Open Project
+                                </Link>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </section>
             </div>
-        </div>
+        </main>
     );
 }
