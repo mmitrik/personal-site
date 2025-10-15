@@ -16,15 +16,6 @@ export default function ContactPage() {
                             <h2 className="text-2xl font-heading mb-6">Get in Touch</h2>
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="text-lg font-medium text-muted">Email</h3>
-                                    <a 
-                                        href="mailto:mmitrik@gmail.com?subject=Let's Connect!"
-                                        className="text-muted hover:text-accent"
-                                    >
-                                        mmitrik@gmail.com
-                                    </a>
-                                </div>
-                                <div>
                                     <h3 className="text-lg font-medium text-muted">LinkedIn</h3>
                                     <a 
                                         href="https://linkedin.com/in/mmitrik" 

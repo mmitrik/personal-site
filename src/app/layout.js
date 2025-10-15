@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: "Matt Mitrik",
+  title: "Matthew Mitrik",
   description: "Product & Technical Program Manager | Builder | Leader",
 };
 
