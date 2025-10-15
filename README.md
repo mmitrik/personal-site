@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# 🌐 mmitrik.com
 
-First, run the development server:
+Personal website for **Matt Mitrik** — Product & Technical Program Manager, builder, and team leader.  
+Built as part of a hands-on learning journey into **"vibe coding"** — rapidly prototyping and deploying ideas with modern AI-powered development tools.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 Project Overview
+
+This site serves as a professional hub and creative sandbox — a place to share projects, experiments, and ideas.
+
+- **Framework:** [Next.js](https://nextjs.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Deployment:** [Vercel](https://vercel.com/)
+- **Domain:** [mmitrik.com](https://mmitrik.com)
+- **Hosting Provider:** GoDaddy (DNS managed)
+- **Language:** JavaScript (no TypeScript yet — maybe later 😄)
+
+---
+
+## ✨ Features
+
+- **Dynamic Greeting:** Changes based on the time of day  
+  → “Good morning ☀️”, “Good evening 🌇”, etc., with matching color themes.  
+- **Modern Minimal Design:** Clean typography, subtle colors, responsive layout.  
+- **Vibe-Coded Foundation:** Built iteratively using fast prototyping and AI-assisted coding.
+
+---
+
+## 🧱 Project Structure
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+/
+├── app/                # Next.js app directory
+│   ├── page.js         # Main landing page
+│   └── layout.js       # Global layout
+├── components/         # Reusable UI components
+│   ├── DynamicGreeting.js
+│   ├── Hero.js
+│   └── ...
+├── public/             # Static assets (images, icons, etc.)
+├── styles/             # Tailwind and global CSS
+│   └── globals.css
+└── tailwind.config.js  # Tailwind customization
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+````
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧭 Domain & Deployment
 
-To learn more about Next.js, take a look at the following resources:
+**Domain:** `mmitrik.com`  
+**Registrar:** [GoDaddy](https://www.godaddy.com)  
+**Hosting:** [Vercel](https://vercel.com)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### ✅ DNS Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Type | Name | Value | TTL |
+|------|------|--------|-----|
+| A | @ | 76.76.21.21 | 1 hour |
+| CNAME | www | cname.vercel-dns.com | 1 hour |
 
-## Deploy on Vercel
+Once DNS is propagated, Vercel automatically issues SSL and connects both `www` and the root domain.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧰 Local Development
+
+To run locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Run dev server
+npm run dev
+````
+
+Then visit:
+👉 [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🧠 Next Steps / Future Ideas
+
+* [ ] Add a **“Now Building”** section to highlight current projects.
+* [ ] Include a **light/dark mode toggle** with time-based auto-switch.
+* [ ] Host small **interactive demos** or micro SaaS prototypes.
+* [ ] Add analytics (Vercel or Plausible).
+* [ ] Create an “About Me” section with a short personal bio and leadership principles.
+
+---
+
+## 💡 What is “Vibe Coding”?
+
+> Vibe coding is about speed, creativity, and flow — turning ideas into working software fast, without over-engineering.
+> You build in small, expressive loops: imagine → generate → tweak → deploy.
+
+This project is my first experiment in vibe coding — learning by building, shipping, and iterating in the open.
+
+---
+
+## 🪪 License
+
+MIT License © 2025 Matt Mitrik
+You’re welcome to use this repo as inspiration or a starter template for your own vibe-coded site.
