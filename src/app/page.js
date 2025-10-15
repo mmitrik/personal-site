@@ -1,6 +1,7 @@
 'use client';
 
 import Header from '../components/Header';
+import DynamicGreeting from '../components/DynamicGreeting';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Projects from '../components/Projects';
@@ -11,6 +12,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-bg text-text">
       <div className="max-w-4xl mx-auto p-8 pt-16">
         <Header />
+        <DynamicGreeting />
         <Hero />
         <About />
         <Projects />

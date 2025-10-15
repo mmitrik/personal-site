@@ -111,3 +111,33 @@ a.btn:hover, .btn:hover {
 
 .hover\:text-accent:hover { color: var(--color-accent); }
 .hover\:bg-accent-hover:hover { background-color: var(--color-accent-hover); }
+
+/* Time-based theme overrides */
+body[data-theme="morning"] {
+  --color-bg: #fef7cd;
+  --color-surface: #fef3c7;
+  --color-accent: #f59e0b;
+  --color-accent-hover: #d97706;
+}
+
+body[data-theme="day"] {
+  /* Use default colors - no overrides needed */
+  --color-accent: #2563eb;
+}
+
+body[data-theme="evening"] {
+  --color-bg: #fdf2f8;
+  --color-surface: #fce7f3;
+  --color-accent: #ec4899;
+  --color-accent-hover: #db2777;
+}
+
+
+body[data-theme="night"] {
+  --color-bg: #1e293b;
+  --color-surface: #334155;
+  --color-text: #f1f5f9;
+  --color-muted: #cbd5e1;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #3b82f6;
+}
