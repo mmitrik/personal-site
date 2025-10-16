@@ -100,9 +100,11 @@ Then visit:
 ### Game Ideas
 - [ ] Click-Miner style game
 - [ ] Pixel draw utility for creating pixel art assets to be used in games
+- [ ] Pokemon Trader card trading game with arbitrage mechanics
 
 ### New Project Ideas
 - [Generated ideas](ideas/ideas.md)
+- [ ] Micro-blogging platform
 
 ### App Improvement Ideas
 - [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)

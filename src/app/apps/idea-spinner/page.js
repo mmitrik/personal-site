@@ -7,7 +7,7 @@ import Header from '../../../components/Header';
 
 export default function IdeaSpinner() {
   const [prompt, setPrompt] = useState(
-    "Generate a creative and innovative feature idea for a personal portfolio website of a Product & Technical Program Manager. The idea should be interactive, engaging, and showcase technical skills while being useful for visitors. Keep it concise and actionable."
+    "Generate a creative and innovative project idea for my website."
   );
   const [idea, setIdea] = useState('');
   const [isLoading, setIsLoading] = useState(false);
