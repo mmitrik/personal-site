@@ -91,6 +91,9 @@ Then visit:
 * [ ] Add analytics (Vercel or Plausible).
 * [ ] Create an “About Me” section with a short personal bio and leadership principles.
 
+### App Ideas
+- [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)
+
 ---
 
 ## 💡 What is “Vibe Coding”?

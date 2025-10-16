@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Header from '../../../components/Header';
 
 export default function IdeaSpinner() {
   const [prompt, setPrompt] = useState(
@@ -44,34 +45,27 @@ export default function IdeaSpinner() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link 
-            href="/" 
-            className="inline-block mb-6 text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            ← Back to Home
-          </Link>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">💡 Idea Spinner</h1>
-          <p className="text-gray-600 text-lg">
-            Generate creative ideas for your website using AI
-          </p>
-        </div>
+    <main className="min-h-screen bg-bg text-text">
+      <div className="max-w-4xl mx-auto p-8 pt-16">
+        <Header />
 
-        {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <section className="bg-surface p-10 rounded-2xl shadow-sm">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-heading mb-4">💡 Idea Spinner</h1>
+            <p className="text-muted text-lg">
+              Generate creative ideas for your website using AI
+            </p>
+          </div>
           {/* Prompt Section */}
           <div className="mb-6">
-            <label htmlFor="prompt" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="prompt" className="block text-sm font-medium text-text mb-2">
               Custom Prompt
             </label>
             <textarea
               id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full h-32 px-4 py-3 bg-bg border border-border rounded-lg text-text focus:outline-none focus:ring-2 focus:ring-accent resize-none"
               placeholder="Enter your prompt here..."
             />
           </div>
@@ -81,10 +75,8 @@ export default function IdeaSpinner() {
             <button
               onClick={generateIdea}
               disabled={isLoading}
-              className={`px-8 py-4 rounded-lg text-white font-semibold text-lg transition-all transform ${
-                isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 active:scale-95'
+              className={`btn text-lg px-8 py-4 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               {isLoading ? (
@@ -103,23 +95,23 @@ export default function IdeaSpinner() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg">
               <p className="text-red-700">{error}</p>
             </div>
           )}
 
           {/* Generated Idea */}
           {idea && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-text mb-3 flex items-center">
                 💡 Generated Idea
               </h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <p className="text-muted leading-relaxed whitespace-pre-wrap">
                 {idea}
               </p>
             </div>
           )}
-        </div>
+        </section>
 
         {/* Info Section */}
         <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -129,6 +121,6 @@ export default function IdeaSpinner() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
