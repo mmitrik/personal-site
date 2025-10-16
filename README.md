@@ -1,7 +1,7 @@
 
 # 🌐 mmitrik.com
 
-Personal website for **Matt Mitrik** — Product & Technical Program Manager, builder, and team leader.  
+Personal website for **Matthew Mitrik** — Product & Technical Program Manager, builder, and team leader.  
 Built as part of a hands-on learning journey into **"vibe coding"** — rapidly prototyping and deploying ideas with modern AI-powered development tools.
 
 ---
