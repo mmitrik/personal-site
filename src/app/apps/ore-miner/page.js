@@ -125,106 +125,108 @@ export default function OreMiner() {
         <section className="mt-8 bg-surface p-8 rounded-2xl shadow-sm">
           <h2 className="text-2xl font-semibold text-text mb-6 text-center">Upgrades</h2>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Pick Upgrades Column */}
-            <div>
-              <h3 className="text-xl font-semibold text-text mb-4 text-center">Pick Upgrades</h3>
-              
-              {/* Current Pick */}
-              <div className="bg-bg p-6 rounded-lg border border-border mb-4">
-                <h4 className="text-lg font-semibold text-text mb-4 text-center">Current Pick</h4>
-                <div className="text-center">
-                  <div className="text-4xl mb-2">{currentPick.emoji}</div>
-                  <h5 className="text-xl font-bold text-accent mb-2">{currentPick.name}</h5>
-                  <p className="text-muted">Efficiency: {currentPick.efficiency} ore/click</p>
-                </div>
-              </div>
-
-              {/* Next Pick Upgrade */}
-              {nextPick ? (
-                <div className="bg-bg p-6 rounded-lg border border-border">
-                  <h4 className="text-lg font-semibold text-text mb-4 text-center">Next Upgrade</h4>
-                  <div className="text-center mb-4">
-                    <div className="text-3xl mb-2">{nextPick.emoji}</div>
-                    <h5 className="text-lg font-bold text-text mb-1">{nextPick.name}</h5>
-                    <p className="text-muted text-sm">Efficiency: {nextPick.efficiency} ore/click</p>
-                    <p className="text-accent text-sm font-semibold">+{nextPick.efficiency - currentPick.efficiency} ore/click</p>
-                  </div>
+          <div className="space-y-6">
+            {/* Pick Upgrades Row */}
+            <div className="bg-bg p-6 rounded-lg border border-border">
+              <h3 className="text-xl font-semibold text-text mb-6">Pick Upgrades</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Current Pick */}
+                <div className="bg-surface p-4 rounded-lg">
+                  <h4 className="text-lg font-semibold text-text mb-4 text-center">Current Pick</h4>
                   <div className="text-center">
-                    <button
-                      onClick={buyUpgrade}
-                      disabled={oreCount < nextPick.cost}
-                      className={`btn px-6 py-3 w-full ${
-                        oreCount >= nextPick.cost 
-                          ? 'hover:scale-105 active:scale-95' 
-                          : 'opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      Buy for {nextPick.cost.toLocaleString()} ore
-                    </button>
-                    <p className="text-muted text-xs mt-2">
-                      {oreCount >= nextPick.cost 
-                        ? 'Ready to upgrade!' 
-                        : `Need ${(nextPick.cost - oreCount).toLocaleString()} more ore`
+                    <div className="text-4xl mb-2">{currentPick.emoji}</div>
+                    <h5 className="text-xl font-bold text-accent mb-2">{currentPick.name}</h5>
+                    <p className="text-muted">Efficiency: {currentPick.efficiency} ore/click</p>
+                  </div>
+                </div>
+
+                {/* Next Pick Upgrade */}
+                {nextPick ? (
+                  <div className="bg-surface p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-text mb-4 text-center">Next Upgrade</h4>
+                    <div className="text-center mb-4">
+                      <div className="text-3xl mb-2">{nextPick.emoji}</div>
+                      <h5 className="text-lg font-bold text-text mb-1">{nextPick.name}</h5>
+                      <p className="text-muted text-sm">Efficiency: {nextPick.efficiency} ore/click</p>
+                      <p className="text-accent text-sm font-semibold">+{nextPick.efficiency - currentPick.efficiency} ore/click</p>
+                    </div>
+                    <div className="text-center">
+                      <button
+                        onClick={buyUpgrade}
+                        disabled={oreCount < nextPick.cost}
+                        className={`btn px-6 py-3 w-full ${
+                          oreCount >= nextPick.cost 
+                            ? 'hover:scale-105 active:scale-95' 
+                            : 'opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        Buy for {nextPick.cost.toLocaleString()} ore
+                      </button>
+                      <p className="text-muted text-xs mt-2">
+                        {oreCount >= nextPick.cost 
+                          ? 'Ready to upgrade!' 
+                          : `Need ${(nextPick.cost - oreCount).toLocaleString()} more ore`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-surface p-4 rounded-lg text-center">
+                    <div className="text-4xl mb-4">🏆</div>
+                    <h4 className="text-lg font-semibold text-text mb-2">Max Level Reached!</h4>
+                    <p className="text-muted">You have the ultimate mining pick!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Auto Miners Row */}
+            <div className="bg-bg p-6 rounded-lg border border-border">
+              <h3 className="text-xl font-semibold text-text mb-6">Auto Miners</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Current Auto Miners */}
+                <div className="bg-surface p-4 rounded-lg">
+                  <h4 className="text-lg font-semibold text-text mb-4 text-center">Auto Picks Owned</h4>
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">⚙️</div>
+                    <h5 className="text-xl font-bold text-accent mb-2">{autoMinerCount}</h5>
+                    <p className="text-muted">
+                      {autoMinerCount === 0 
+                        ? 'No auto miners yet' 
+                        : `${autoMinerCount * currentPick.efficiency} ore/second`
                       }
                     </p>
                   </div>
                 </div>
-              ) : (
-                <div className="bg-bg p-6 rounded-lg border border-border text-center">
-                  <div className="text-4xl mb-4">🏆</div>
-                  <h4 className="text-lg font-semibold text-text mb-2">Max Level Reached!</h4>
-                  <p className="text-muted">You have the ultimate mining pick!</p>
-                </div>
-              )}
-            </div>
 
-            {/* Auto Miners Column */}
-            <div>
-              <h3 className="text-xl font-semibold text-text mb-4 text-center">Auto Miners</h3>
-              
-              {/* Current Auto Miners */}
-              <div className="bg-bg p-6 rounded-lg border border-border mb-4">
-                <h4 className="text-lg font-semibold text-text mb-4 text-center">Auto Picks Owned</h4>
-                <div className="text-center">
-                  <div className="text-4xl mb-2">⚙️</div>
-                  <h5 className="text-xl font-bold text-accent mb-2">{autoMinerCount}</h5>
-                  <p className="text-muted">
-                    {autoMinerCount === 0 
-                      ? 'No auto miners yet' 
-                      : `${autoMinerCount * currentPick.efficiency} ore/second`
-                    }
-                  </p>
-                </div>
-              </div>
-
-              {/* Buy Auto Miner */}
-              <div className="bg-bg p-6 rounded-lg border border-border">
-                <h4 className="text-lg font-semibold text-text mb-4 text-center">Buy Auto Pick</h4>
-                <div className="text-center mb-4">
-                  <div className="text-3xl mb-2">⚙️</div>
-                  <h5 className="text-lg font-bold text-text mb-1">Auto Pick</h5>
-                  <p className="text-muted text-sm">Mines {currentPick.efficiency} ore/second</p>
-                  <p className="text-accent text-sm font-semibold">Passive income!</p>
-                </div>
-                <div className="text-center">
-                  <button
-                    onClick={buyAutoMiner}
-                    disabled={oreCount < getAutoMinerCost()}
-                    className={`btn px-6 py-3 w-full ${
-                      oreCount >= getAutoMinerCost() 
-                        ? 'hover:scale-105 active:scale-95' 
-                        : 'opacity-50 cursor-not-allowed'
-                    }`}
-                  >
-                    Buy for {getAutoMinerCost().toLocaleString()} ore
-                  </button>
-                  <p className="text-muted text-xs mt-2">
-                    {oreCount >= getAutoMinerCost() 
-                      ? 'Ready to buy!' 
-                      : `Need ${(getAutoMinerCost() - oreCount).toLocaleString()} more ore`
-                    }
-                  </p>
+                {/* Buy Auto Miner */}
+                <div className="bg-surface p-4 rounded-lg">
+                  <h4 className="text-lg font-semibold text-text mb-4 text-center">Buy Auto Pick</h4>
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">⚙️</div>
+                    <h5 className="text-lg font-bold text-text mb-1">Auto Pick</h5>
+                    <p className="text-muted text-sm">Mines {currentPick.efficiency} ore/second</p>
+                    <p className="text-accent text-sm font-semibold">Passive income!</p>
+                  </div>
+                  <div className="text-center">
+                    <button
+                      onClick={buyAutoMiner}
+                      disabled={oreCount < getAutoMinerCost()}
+                      className={`btn px-6 py-3 w-full ${
+                        oreCount >= getAutoMinerCost() 
+                          ? 'hover:scale-105 active:scale-95' 
+                          : 'opacity-50 cursor-not-allowed'
+                      }`}
+                    >
+                      Buy for {getAutoMinerCost().toLocaleString()} ore
+                    </button>
+                    <p className="text-muted text-xs mt-2">
+                      {oreCount >= getAutoMinerCost() 
+                        ? 'Ready to buy!' 
+                        : `Need ${(getAutoMinerCost() - oreCount).toLocaleString()} more ore`
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
