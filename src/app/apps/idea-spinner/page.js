@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import Header from '../../../components/Header';
 
 export default function IdeaSpinner() {
@@ -11,6 +12,36 @@ export default function IdeaSpinner() {
   const [idea, setIdea] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Static test content for styling testing
+  const testMarkdownContent = `## Interactive Portfolio Feature
+
+**Key Components:**
+- Real-time data visualization
+- \`React\` components with animations  
+- API integration with live data
+
+### Implementation Details
+
+This feature would showcase your technical skills while providing **value** to visitors. 
+
+**Benefits include:**
+1. Enhanced user engagement
+2. Technical skill demonstration  
+3. Interactive experience
+
+> **Note:** This is a test example to demonstrate markdown rendering capabilities.
+
+\`\`\`javascript
+const example = "code block styling";
+\`\`\`
+
+**Lorem ipsum** dolor sit amet, *consectetur* adipiscing elit.`;
+
+  const loadTestContent = () => {
+    setError('');
+    setIdea(testMarkdownContent);
+  };
 
   const generateIdea = async () => {
     if (!prompt.trim()) {
@@ -70,8 +101,8 @@ export default function IdeaSpinner() {
             />
           </div>
 
-          {/* Generate Button */}
-          <div className="text-center mb-8">
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4 mb-8">
             <button
               onClick={generateIdea}
               disabled={isLoading}
@@ -91,6 +122,16 @@ export default function IdeaSpinner() {
                 '🎲 Spin for New Idea'
               )}
             </button>
+            
+            <button
+              onClick={loadTestContent}
+              disabled={isLoading}
+              className={`btn-outline text-lg px-8 py-4 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              🧪 Test
+            </button>
           </div>
 
           {/* Error Message */}
@@ -102,13 +143,13 @@ export default function IdeaSpinner() {
 
           {/* Generated Idea */}
           {idea && (
-            <div className="card p-6">
+            <div className="bg-bg p-8 rounded-2xl shadow-sm border border-border">
               <h3 className="text-lg font-semibold text-text mb-3 flex items-center">
                 💡 Generated Idea
               </h3>
-              <p className="text-muted leading-relaxed whitespace-pre-wrap">
-                {idea}
-              </p>
+              <div className="text-muted leading-relaxed prose prose-sm max-w-none prose-headings:text-text prose-strong:text-text prose-code:text-accent prose-code:bg-surface prose-code:px-1 prose-code:rounded">
+                <ReactMarkdown>{idea}</ReactMarkdown>
+              </div>
             </div>
           )}
         </section>
