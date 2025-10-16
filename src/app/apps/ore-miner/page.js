@@ -155,7 +155,7 @@ export default function OreMiner() {
         {/* Info Section */}
         <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800 text-sm">
-            <strong>🎮 How to Play:</strong> Click the "Mine Ore" button to collect ore. 
+            <strong>🎮 How to Play:</strong> Click the &quot;Mine Ore&quot; button to collect ore. 
             Watch your collection grow and upgrade your pick for better efficiency!
           </p>
         </div>
