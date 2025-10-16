@@ -2,15 +2,21 @@ import Link from "next/link";
 import Header from "../../components/Header";
 
 const projects = [
+
+    {
+        title: "Compliment Generator",
+        description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
+        link: "/apps/compliments",
+    },
     {
         title: "Idea Spinner",
         description: "An AI-powered idea generator that uses Azure OpenAI's GPT-4o-mini model to create innovative website feature suggestions. Includes customizable prompts and secure API integration.",
         link: "/apps/idea-spinner",
     },
     {
-        title: "Compliment Generator",
-        description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
-        link: "/apps/compliments",
+        title: "Ore Miner",
+        description: "A simple and addictive clicking game where you mine ore by clicking a button. Track your progress and watch your mining level increase as you collect more ore.",
+        link: "/apps/ore-miner",
     },
     {
         title: "Project Two",
