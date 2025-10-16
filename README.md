@@ -85,14 +85,29 @@ Then visit:
 
 ## 🧠 Next Steps / Future Ideas
 
-* [ ] Add a **“Now Building”** section to highlight current projects.
-* [ ] Include a **light/dark mode toggle** with time-based auto-switch.
-* [ ] Host small **interactive demos** or micro SaaS prototypes.
-* [ ] Add analytics (Vercel or Plausible).
-* [ ] Create an “About Me” section with a short personal bio and leadership principles.
+- [ ] Add a **“Now Building”** section to highlight current projects.
+- [ ] Host small **interactive demos** or micro SaaS prototypes.
+- [ ] Add analytics (Vercel or Plausible).
 
-### App Ideas
+### Content Ideas
+- [ ] Create an “About Me” section with a short personal bio and leadership principles.
+- [ ] Add a photo to make the site more human.
+
+### Design Ideas
+- [ ] Improve the mobile rendering to increase the minimum width on card controls (text with lots of line breaks is hard to read).
+- [ ] Include a **light/dark mode toggle** with time-based auto-switch.
+
+### Game Ideas
+- [ ] Click-Miner style game
+- [ ] Pixel draw utility for creating pixel art assets to be used in games
+
+### New Project Ideas
+- [Generated ideas](ideas/ideas.md)
+
+### App Improvement Ideas
 - [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)
+
+
 
 ---
 
