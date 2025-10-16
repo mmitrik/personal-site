@@ -12,6 +12,8 @@ export default function IdeaSpinner() {
   const [idea, setIdea] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [priorIdeas, setPriorIdeas] = useState([]);
+  const [expandedIdeas, setExpandedIdeas] = useState({});
 
   // Static test content for styling testing
   const testMarkdownContent = `## Interactive Portfolio Feature
@@ -38,8 +40,35 @@ const example = "code block styling";
 
 **Lorem ipsum** dolor sit amet, *consectetur* adipiscing elit.`;
 
+  // Helper functions for prior ideas management
+  const addToPriorIdeas = (ideaText) => {
+    const newIdea = {
+      id: Date.now(),
+      content: ideaText,
+      timestamp: new Date()
+    };
+    setPriorIdeas(prev => [newIdea, ...prev]);
+    // Default new ideas to collapsed
+    setExpandedIdeas(prev => ({ ...prev, [newIdea.id]: false }));
+  };
+
+  const toggleIdeaExpansion = (ideaId) => {
+    setExpandedIdeas(prev => ({ 
+      ...prev, 
+      [ideaId]: !prev[ideaId] 
+    }));
+  };
+
+  const getFirstLine = (text) => {
+    return text.split('\n')[0].replace(/^#+\s*/, '').trim();
+  };
+
   const loadTestContent = () => {
     setError('');
+    // If there's already an idea, add it to prior ideas
+    if (idea.trim()) {
+      addToPriorIdeas(idea);
+    }
     setIdea(testMarkdownContent);
   };
 
@@ -49,8 +78,14 @@ const example = "code block styling";
       return;
     }
 
+    // If there's already an idea, add it to prior ideas
+    if (idea.trim()) {
+      addToPriorIdeas(idea);
+    }
+
     setIsLoading(true);
     setError('');
+    setIdea(''); // Clear current idea while loading
     
     try {
       const response = await fetch('/api/generate-idea', {
@@ -153,6 +188,40 @@ const example = "code block styling";
             </div>
           )}
         </section>
+
+        {/* Prior Ideas Section */}
+        {priorIdeas.length > 0 && (
+          <section className="mt-8">
+            <h2 className="text-xl font-semibold text-text mb-4">Prior Ideas</h2>
+            <div className="space-y-3">
+              {priorIdeas.map((priorIdea) => (
+                <div 
+                  key={priorIdea.id} 
+                  className="bg-bg border border-border rounded-lg overflow-hidden"
+                >
+                  <button
+                    onClick={() => toggleIdeaExpansion(priorIdea.id)}
+                    className="w-full p-4 text-left hover:bg-surface transition-colors flex justify-between items-center"
+                  >
+                    <span className="text-muted truncate pr-4">
+                      {getFirstLine(priorIdea.content)}
+                    </span>
+                    <span className="text-accent text-sm flex-shrink-0">
+                      {expandedIdeas[priorIdea.id] ? '▼' : '▶'}
+                    </span>
+                  </button>
+                  {expandedIdeas[priorIdea.id] && (
+                    <div className="px-4 pb-4 border-t border-border">
+                      <div className="text-muted leading-relaxed prose prose-sm max-w-none prose-headings:text-text prose-strong:text-text prose-code:text-accent prose-code:bg-surface prose-code:px-1 prose-code:rounded pt-3">
+                        <ReactMarkdown>{priorIdea.content}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Info Section */}
         <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
