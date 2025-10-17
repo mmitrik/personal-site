@@ -10,6 +10,48 @@ export default function OreMiner() {
   const [currentPickIndex, setCurrentPickIndex] = useState(0);
   const [autoMinerCount, setAutoMinerCount] = useState(0);
 
+  // Local storage functions
+  const saveGameState = () => {
+    if (typeof window !== 'undefined') {
+      const gameState = {
+        oreCount,
+        clickCount,
+        currentPickIndex,
+        autoMinerCount
+      };
+      localStorage.setItem('oreMinerGameState', JSON.stringify(gameState));
+    }
+  };
+
+  const loadGameState = () => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('oreMinerGameState');
+      if (savedState) {
+        const gameState = JSON.parse(savedState);
+        setOreCount(gameState.oreCount || 0);
+        setClickCount(gameState.clickCount || 0);
+        setCurrentPickIndex(gameState.currentPickIndex || 0);
+        setAutoMinerCount(gameState.autoMinerCount || 0);
+      }
+    }
+  };
+
+  const resetGameState = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to start a new game?\n\nThis will permanently delete all your progress.'
+    );
+    
+    if (confirmed) {
+      setOreCount(0);
+      setClickCount(0);
+      setCurrentPickIndex(0);
+      setAutoMinerCount(0);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('oreMinerGameState');
+      }
+    }
+  };
+
   // Pick upgrade progression
   const pickUpgrades = [
     { name: 'Iron Pick', efficiency: 1, cost: 0, emoji: '⛏️' },
@@ -56,6 +98,16 @@ export default function OreMiner() {
       return () => clearInterval(interval);
     }
   }, [autoMinerCount, currentPick.efficiency]);
+
+  // Load game state on mount
+  useEffect(() => {
+    loadGameState();
+  }, []);
+
+  // Save game state whenever it changes
+  useEffect(() => {
+    saveGameState();
+  }, [oreCount, clickCount, currentPickIndex, autoMinerCount]);
 
   return (
     <main className="min-h-screen bg-bg text-text">
@@ -241,9 +293,22 @@ export default function OreMiner() {
           </p>
         </div>
 
+        {/* Reset Game Section */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={resetGameState}
+            className="btn-outline px-4 py-2 text-sm"
+          >
+            Start New Game
+          </button>
+          <p className="text-muted text-xs mt-2">
+            This will reset all progress and cannot be undone
+          </p>
+        </div>
+
         {/* Version Footer */}
         <footer className="mt-8 text-center">
-          <p className="text-muted text-xs">Ore Miner v0.02</p>
+          <p className="text-muted text-xs">Ore Miner v0.03</p>
         </footer>
       </div>
     </main>
