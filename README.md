@@ -89,6 +89,14 @@ Then visit:
 - [ ] Host small **interactive demos** or micro SaaS prototypes.
 - [ ] Add analytics (Vercel or Plausible).
 
+### Things to learn
+- [ ] Server-side storage/persistence
+- [ ] Working with visual assets
+- [ ] HTML5 Canvas
+- [ ] Incorporating sound/music
+- [ ] Interactive sessions
+- [ ] 
+
 ### Content Ideas
 - [ ] Create an “About Me” section with a short personal bio and leadership principles.
 - [ ] Add a photo to make the site more human.
@@ -98,18 +106,19 @@ Then visit:
 - [ ] Include a **light/dark mode toggle** with time-based auto-switch.
 
 ### Game Ideas
-- [ ] Click-Miner style game
+- [x] Click-Miner style game 
 - [ ] Pixel draw utility for creating pixel art assets to be used in games
 - [ ] Pokemon Trader card trading game with arbitrage mechanics
+- [ ] Zork-style text adventure game using AI generated world
+    - [ ] Implement and AI player that plays the game
 
 ### New Project Ideas
 - [Generated ideas](ideas/ideas.md)
-- [ ] Micro-blogging platform
+- [ ] Micro-blogging platform (capture ideas from learning sessions)
 
 ### App Improvement Ideas
 - [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)
-
-
+- [Ore Miner ideas](src/app/apps/ore-miner/readme.md)
 
 ---
 
