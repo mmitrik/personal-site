@@ -95,7 +95,6 @@ Then visit:
 - [ ] HTML5 Canvas
 - [ ] Incorporating sound/music
 - [ ] Interactive sessions
-- [ ] 
 
 ### Content Ideas
 - [ ] Create an “About Me” section with a short personal bio and leadership principles.
@@ -110,7 +109,7 @@ Then visit:
 - [ ] Pixel draw utility for creating pixel art assets to be used in games
 - [ ] Pokemon Trader card trading game with arbitrage mechanics
 - [ ] Zork-style text adventure game using AI generated world
-    - [ ] Implement and AI player that plays the game
+    - [ ] Implement an AI player that plays the game
 
 ### New Project Ideas
 - [Generated ideas](ideas/ideas.md)
