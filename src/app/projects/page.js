@@ -2,7 +2,6 @@ import Link from "next/link";
 import Header from "../../components/Header";
 
 const projects = [
-
     {
         title: "Compliment Generator",
         description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
@@ -19,14 +18,9 @@ const projects = [
         link: "/apps/ore-miner",
     },
     {
-        title: "Project Two",
-        description: "This is a short description of Project Two.",
-        link: "/apps/project-two",
-    },
-    {
-        title: "Project Three",
-        description: "This is a short description of Project Three.",
-        link: "/apps/project-three",
+        title: "Text Adventure",
+        description: "A classic text-based adventure game with a retro terminal interface. Explore different areas, collect items, and interact with objects using traditional commands like 'look', 'go', and 'take'.",
+        link: "/apps/text-adventure",
     },
 ];
 
