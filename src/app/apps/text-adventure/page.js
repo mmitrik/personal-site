@@ -34,16 +34,39 @@ export default function TextAdventure() {
       canTake: false,
       examine: () => "The red door appears to be unlocked. You could try entering the house."
     },
+    mailbox: {
+      aliases: ['mailbox', 'mail box', 'box'],
+      canTake: false,
+      examine: (gameState) => {
+        if (!gameState.mailboxOpened) {
+          return "A white mailbox stands near the house. It appears to be closed.";
+        } else if (!gameState.paperTaken) {
+          return "The mailbox is open. There's a piece of paper inside.";
+        } else {
+          return "The mailbox is open and empty.";
+        }
+      },
+      use: (gameState) => {
+        if (!gameState.mailboxOpened) {
+          return {
+            message: "You open the mailbox and find a piece of paper inside.",
+            stateUpdate: { mailboxOpened: true }
+          };
+        } else {
+          return "The mailbox is already open.";
+        }
+      }
+    },
     
-    // Room objects
+    // Kitchen objects (renamed from Room)
     table: {
       aliases: ['table', 'wooden table'],
       canTake: false,
       examine: (gameState) => {
-        if (!gameState.paperTaken) {
-          return "It's a simple wooden table. There's a piece of paper on it with writing.";
+        if (!gameState.mapTaken) {
+          return "It's a simple wooden table. There's a map spread out on it.";
         } else {
-          return "It's a simple wooden table. The paper that was on it is no longer there.";
+          return "It's a simple wooden table. The map that was on it is no longer there.";
         }
       }
     },
@@ -53,30 +76,48 @@ export default function TextAdventure() {
       examine: () => "Two simple wooden chairs that match the table. They look comfortable enough to sit in.",
       use: () => "You sit down on one of the chairs. It's quite comfortable."
     },
+    map: {
+      aliases: ['map', 'paper map'],
+      canTake: true,
+      examine: () => "A detailed map showing the house in a field. To the west of the house is a dense forest. Beyond the forest appears to be a stream, and across the stream is marked with an X.",
+      read: () => "The map shows the house in the field. To the west of the house is a forest. Beyond the forest there appears to be a stream. Across the stream is an X.",
+      take: (gameState) => {
+        if (!gameState.mapTaken) {
+          return {
+            message: "You take the map from the table.",
+            stateUpdate: { mapTaken: true },
+            addToInventory: 'map'
+          };
+        } else {
+          return { message: "You already have the map." };
+        }
+      },
+      drop: () => ({
+        message: "You drop the map.",
+        stateUpdate: { mapTaken: false },
+        removeFromInventory: 'map'
+      })
+    },
     paper: {
       aliases: ['paper', 'note', 'piece of paper'],
       canTake: true,
       examine: (gameState, inventory) => {
         if (inventory.includes('paper')) {
           return "A piece of paper with writing on it. You could try reading it.";
-        } else if (!gameState.paperTaken) {
-          return "A piece of paper on the table with some writing on it. You could take it or try to read it.";
+        } else if (gameState.mailboxOpened && !gameState.paperTaken) {
+          return "A piece of paper from the mailbox with some writing on it. You could take it or try to read it.";
         } else {
           return "There's no paper here to examine.";
         }
       },
-      read: (gameState) => {
-        if (gameState.paperTaken || !gameState.paperTaken) {
-          return {
-            message: "The paper reads: 'Welcome to your new home! The key to adventure lies in exploration. Don't be afraid to examine everything around you.'",
-            stateUpdate: { paperRead: true }
-          };
-        }
-      },
+      read: () => ({
+        message: "The paper reads: 'Welcome to your new home! The key to adventure lies in exploration. Don't be afraid to examine everything around you.'",
+        stateUpdate: { paperRead: true }
+      }),
       take: (gameState) => {
-        if (!gameState.paperTaken) {
+        if (gameState.mailboxOpened && !gameState.paperTaken) {
           return {
-            message: "You take the piece of paper from the table.",
+            message: "You take the piece of paper from the mailbox.",
             stateUpdate: { paperTaken: true },
             addToInventory: 'paper'
           };
@@ -89,6 +130,235 @@ export default function TextAdventure() {
         stateUpdate: { paperTaken: false },
         removeFromInventory: 'paper'
       })
+    },
+    
+    // Bedroom objects
+    bed: {
+      aliases: ['bed', 'bedroom bed'],
+      canTake: false,
+      examine: () => "A comfortable-looking bed with neatly made sheets and a soft pillow.",
+      use: () => "You lie down on the bed for a moment. It's very comfortable, but you have exploring to do."
+    },
+    nightstand: {
+      aliases: ['nightstand', 'bedside table', 'table'],
+      canTake: false,
+      examine: (gameState) => {
+        const items = [];
+        if (!gameState.knifeTaken) items.push("a knife");
+        if (!gameState.keyTaken) items.push("a key");
+        
+        if (items.length === 0) {
+          return "A small wooden nightstand beside the bed. It's now empty.";
+        } else if (items.length === 1) {
+          return `A small wooden nightstand beside the bed. On it is ${items[0]}.`;
+        } else {
+          return `A small wooden nightstand beside the bed. On it are ${items.join(" and ")}.`;
+        }
+      }
+    },
+    knife: {
+      aliases: ['knife', 'blade'],
+      canTake: true,
+      examine: () => "A sharp kitchen knife with a wooden handle. It looks well-maintained and useful.",
+      take: (gameState) => {
+        if (!gameState.knifeTaken) {
+          return {
+            message: "You take the knife from the nightstand.",
+            stateUpdate: { knifeTaken: true },
+            addToInventory: 'knife'
+          };
+        } else {
+          return { message: "You already have the knife." };
+        }
+      },
+      drop: () => ({
+        message: "You drop the knife.",
+        stateUpdate: { knifeTaken: false },
+        removeFromInventory: 'knife'
+      })
+    },
+    key: {
+      aliases: ['key', 'small key'],
+      canTake: true,
+      examine: () => "A small brass key. It looks like it might unlock something important.",
+      take: (gameState) => {
+        if (!gameState.keyTaken) {
+          return {
+            message: "You take the key from the nightstand.",
+            stateUpdate: { keyTaken: true },
+            addToInventory: 'key'
+          };
+        } else {
+          return { message: "You already have the key." };
+        }
+      },
+      drop: () => ({
+        message: "You drop the key.",
+        stateUpdate: { keyTaken: false },
+        removeFromInventory: 'key'
+      }),
+      use: (gameState, inventory) => {
+        if (gameState.trunkFound && !gameState.trunkUnlocked) {
+          return {
+            message: "You use the key to unlock the trunk. It opens with a satisfying click, revealing a crystal sphere and a small vial inside.",
+            stateUpdate: { trunkUnlocked: true }
+          };
+        } else {
+          return "There's nothing here to unlock with the key.";
+        }
+      }
+    },
+    
+    // Backyard objects
+    garden: {
+      aliases: ['garden', 'vegetable garden', 'plants'],
+      canTake: false,
+      examine: (gameState) => {
+        if (!gameState.shovelTaken) {
+          return "A well-tended vegetable garden with rows of tomatoes, carrots, and lettuce. A shovel leans against the garden bed.";
+        } else {
+          return "A well-tended vegetable garden with rows of tomatoes, carrots, and lettuce.";
+        }
+      }
+    },
+    shovel: {
+      aliases: ['shovel', 'spade'],
+      canTake: true,
+      examine: () => "A sturdy gardening shovel with a wooden handle and metal blade. Perfect for digging.",
+      take: (gameState) => {
+        if (!gameState.shovelTaken) {
+          return {
+            message: "You take the shovel from the garden.",
+            stateUpdate: { shovelTaken: true },
+            addToInventory: 'shovel'
+          };
+        } else {
+          return { message: "You already have the shovel." };
+        }
+      },
+      drop: () => ({
+        message: "You drop the shovel.",
+        stateUpdate: { shovelTaken: false },
+        removeFromInventory: 'shovel'
+      }),
+      use: (gameState, inventory, currentArea) => {
+        if (currentArea === 'clearing' && !gameState.trunkFound) {
+          return {
+            message: "You dig a hole in the clearing with the shovel. After some digging, you uncover an old wooden trunk buried in the earth!",
+            stateUpdate: { trunkFound: true }
+          };
+        } else {
+          return "You dig a small hole, but find nothing of interest.";
+        }
+      }
+    },
+    
+    // Forest objects
+    trees: {
+      aliases: ['trees', 'tree', 'forest'],
+      canTake: false,
+      examine: () => "Tall oak and maple trees stretch up toward the sky, their branches swaying gently in the breeze."
+    },
+    birds: {
+      aliases: ['birds', 'bird'],
+      canTake: false,
+      examine: () => "Small songbirds flit between the branches, their cheerful melodies filling the air."
+    },
+    signpost: {
+      aliases: ['sign', 'signpost', 'post', 'wooden sign'],
+      canTake: false,
+      examine: () => "An old wooden signpost leans slightly to one side. The words that once marked directions have faded beyond recognition."
+    },
+    bridge: {
+      aliases: ['bridge', 'wooden bridge', 'small bridge'],
+      canTake: false,
+      examine: () => "A simple wooden bridge spans the narrow stream. It looks sturdy enough to cross safely."
+    },
+    stream: {
+      aliases: ['stream', 'water', 'creek'],
+      canTake: false,
+      examine: () => "Clear water flows gently over smooth rocks, creating a peaceful babbling sound."
+    },
+    blackstone: {
+      aliases: ['stone', 'black stone', 'rock'],
+      canTake: false,
+      examine: () => "A small, perfectly round black stone sits in the center of the clearing. It seems oddly out of place."
+    },
+    trunk: {
+      aliases: ['trunk', 'wooden trunk', 'chest'],
+      canTake: false,
+      examine: (gameState) => {
+        if (!gameState.trunkFound) {
+          return "There's no trunk here that you can see.";
+        } else if (!gameState.trunkUnlocked) {
+          return "An old wooden trunk, partially covered in dirt from being buried. It has a small brass lock that needs a key.";
+        } else {
+          const items = [];
+          if (!gameState.crystalTaken) items.push("a crystal sphere");
+          if (!gameState.vialTaken) items.push("a small vial");
+          
+          if (items.length === 0) {
+            return "The unlocked trunk is now empty.";
+          } else if (items.length === 1) {
+            return `The unlocked trunk contains ${items[0]}.`;
+          } else {
+            return `The unlocked trunk contains ${items.join(" and ")}.`;
+          }
+        }
+      },
+      use: (gameState) => {
+        if (!gameState.trunkFound) {
+          return "There's no trunk here to open.";
+        } else if (!gameState.trunkUnlocked) {
+          return "The trunk is locked. You need a key to open it.";
+        } else {
+          return "The trunk is already open.";
+        }
+      }
+    },
+    crystal: {
+      aliases: ['crystal', 'sphere', 'crystal sphere', 'orb'],
+      canTake: true,
+      examine: () => "A perfectly round, clear crystal sphere that fits in your palm. Looking through it causes the surrounding area to appear strangely distorted.",
+      take: (gameState) => {
+        if (gameState.trunkUnlocked && !gameState.crystalTaken) {
+          return {
+            message: "You carefully take the crystal sphere from the trunk.",
+            stateUpdate: { crystalTaken: true },
+            addToInventory: 'crystal'
+          };
+        } else {
+          return { message: "You already have the crystal sphere." };
+        }
+      },
+      drop: () => ({
+        message: "You carefully set down the crystal sphere.",
+        stateUpdate: { crystalTaken: false },
+        removeFromInventory: 'crystal'
+      }),
+      use: () => "You hold up the crystal sphere and peer through it. The world around you appears warped and distorted, as if seen through water."
+    },
+    vial: {
+      aliases: ['vial', 'bottle', 'green liquid', 'potion'],
+      canTake: true,
+      examine: () => "A small glass vial containing a translucent, green liquid. It's stoppered with a cork that fits snugly.",
+      take: (gameState) => {
+        if (gameState.trunkUnlocked && !gameState.vialTaken) {
+          return {
+            message: "You carefully take the vial from the trunk.",
+            stateUpdate: { vialTaken: true },
+            addToInventory: 'vial'
+          };
+        } else {
+          return { message: "You already have the vial." };
+        }
+      },
+      drop: () => ({
+        message: "You carefully set down the vial.",
+        stateUpdate: { vialTaken: false },
+        removeFromInventory: 'vial'
+      }),
+      use: () => "You examine the vial closely. The green liquid swirls mysteriously inside, but you're not sure it's safe to drink."
     }
   };
 
@@ -96,26 +366,89 @@ export default function TextAdventure() {
   const areas = {
     field: {
       name: 'Field',
-      description: "You're standing in a large green field with grasses and other low-lying plants growing all around. A small white house with a red door is nearby.",
+      description: "You're standing in a large green field with grasses and other low-lying plants growing all around. A small white house with a red door is nearby. A mailbox stands near the house.",
       connections: {
-        'room': ['go to house', 'enter house', 'go to door', 'open door', 'go inside', 'go north', 'go to house', 'enter house']
+        'kitchen': ['go to house', 'enter house', 'go to door', 'open door', 'go inside', 'go north'],
+        'backyard': ['go around house', 'go behind house', 'go to backyard', 'go back'],
+        'forestedge': ['go west', 'go to forest', 'enter forest', 'go to woods']
       },
-      objects: ['grass', 'plants', 'house', 'door']
+      objects: ['grass', 'plants', 'house', 'door', 'mailbox', 'paper']
     },
-    room: {
-      name: 'Room',
-      description: "You're standing in the doorway to the house. The interior of the house is a single room with a table and two chairs. On the table is a piece of paper with some writing on it.",
+    kitchen: {
+      name: 'Kitchen',
+      description: "You're standing in the kitchen of the house. The room has a simple wooden table with two chairs. A map is spread out on the table. A doorway to the east leads to another room.",
       connections: {
-        'field': ['go outside', 'leave house', 'go south', 'exit', 'go to field']
+        'field': ['go outside', 'leave house', 'go south', 'exit', 'go to field'],
+        'bedroom': ['go east', 'go to bedroom', 'enter bedroom', 'go to room']
       },
-      objects: ['table', 'chair', 'paper']
+      objects: ['table', 'chair', 'map']
+    },
+    bedroom: {
+      name: 'Bedroom',
+      description: "A cozy bedroom with a comfortable bed against one wall. A small nightstand sits beside the bed with a few items on it.",
+      connections: {
+        'kitchen': ['go west', 'go to kitchen', 'leave bedroom', 'go back']
+      },
+      objects: ['bed', 'nightstand', 'knife', 'key']
+    },
+    backyard: {
+      name: 'Back Yard',
+      description: "You're behind the house in a small backyard. A well-tended vegetable garden takes up most of the space, with neat rows of plants growing in the rich soil.",
+      connections: {
+        'field': ['go around house', 'go to front', 'go to field', 'go forward']
+      },
+      objects: ['garden', 'shovel']
+    },
+    forestedge: {
+      name: 'Forest Edge',
+      description: "You stand at the edge of a dense forest. Tall trees stretch up toward the sky, and you can hear birds singing among the branches. Low-growing plants carpet the forest floor. A path leads deeper into the woods to the west.",
+      connections: {
+        'field': ['go east', 'go back', 'go to field', 'leave forest'],
+        'forestpath': ['go west', 'follow path', 'go deeper', 'enter woods']
+      },
+      objects: ['trees', 'plants', 'birds']
+    },
+    forestpath: {
+      name: 'Forest Path',
+      description: "You're walking along a winding path that continues westward through the dense woods. An old wooden signpost stands along the path, though the words on it are no longer readable. Birds flit between the branches overhead.",
+      connections: {
+        'forestedge': ['go east', 'go back', 'return'],
+        'stream': ['go west', 'continue west', 'follow path']
+      },
+      objects: ['trees', 'plants', 'birds', 'signpost']
+    },
+    stream: {
+      name: 'Stream Crossing',
+      description: "A clear stream flows through the forest here, babbling peacefully over smooth rocks. A small wooden bridge spans the water, allowing safe passage to the other side. The path continues west across the bridge.",
+      connections: {
+        'forestpath': ['go east', 'go back', 'return'],
+        'clearing': ['go west', 'cross bridge', 'continue west', 'cross stream']
+      },
+      objects: ['stream', 'bridge', 'trees']
+    },
+    clearing: {
+      name: 'Forest Clearing',
+      description: "You've entered a peaceful clearing in the heart of the forest. Sunlight filters down through the canopy above. In the center of the clearing sits a small, perfectly round black stone that seems oddly out of place in this natural setting.",
+      connections: {
+        'stream': ['go east', 'go back', 'return', 'cross bridge']
+      },
+      objects: ['blackstone', 'trees', 'trunk', 'crystal', 'vial']
     }
   };
 
   // Game state
   const [gameState, setGameState] = useState({
     paperTaken: false,
-    paperRead: false
+    paperRead: false,
+    mailboxOpened: false,
+    mapTaken: false,
+    knifeTaken: false,
+    keyTaken: false,
+    shovelTaken: false,
+    trunkFound: false,
+    trunkUnlocked: false,
+    crystalTaken: false,
+    vialTaken: false
   });
 
   // Initialize game
@@ -156,6 +489,7 @@ export default function TextAdventure() {
       addToHistory("• Movement: go [direction/location], enter, exit, leave", 'game');
       addToHistory("• Interaction: look, examine [object], take [object], drop [object]", 'game');
       addToHistory("• Objects: use [object], sit on [object], read [object]", 'game');
+      addToHistory("• Actions: open [object], unlock [object], dig", 'game');
       addToHistory("• Inventory: inventory, check inventory", 'game');
       addToHistory("• Other: help", 'game');
       addToHistory("", 'game');
@@ -233,8 +567,57 @@ export default function TextAdventure() {
     }
 
     // Handle sitting (general command)
-    if (cmd === 'sit' && currentArea === 'room') {
+    if (cmd === 'sit' && currentArea === 'kitchen') {
       handleUseObject('chair');
+      return;
+    }
+
+    // Handle digging commands
+    if (cmd.startsWith('dig') || cmd.includes('dig hole')) {
+      if (inventory.includes('shovel')) {
+        const shovelObj = gameObjects.shovel;
+        if (shovelObj.use) {
+          const result = shovelObj.use(gameState, inventory, currentArea);
+          if (typeof result === 'object' && result.stateUpdate) {
+            addToHistory(result.message, 'game');
+            setGameState(prev => ({ ...prev, ...result.stateUpdate }));
+          } else {
+            addToHistory(result, 'game');
+          }
+        }
+      } else {
+        addToHistory("You need something to dig with.", 'game');
+      }
+      addToHistory("", 'game');
+      return;
+    }
+
+    // Handle opening commands
+    if (cmd.startsWith('open ')) {
+      const objectName = cmd.replace(/^open /, '');
+      if (objectName === 'mailbox' || objectName === 'mail box') {
+        handleUseObject('mailbox');
+      } else if (objectName === 'trunk' || objectName === 'chest') {
+        handleUseObject('trunk');
+      } else {
+        addToHistory(`You can't open the ${objectName}.`, 'game');
+        addToHistory("", 'game');
+      }
+      return;
+    }
+
+    // Handle unlocking commands
+    if (cmd.startsWith('unlock ')) {
+      const objectName = cmd.replace(/^unlock /, '');
+      if ((objectName === 'trunk' || objectName === 'chest') && inventory.includes('key')) {
+        handleUseObject('key');
+      } else if (objectName === 'trunk' || objectName === 'chest') {
+        addToHistory("You need a key to unlock the trunk.", 'game');
+        addToHistory("", 'game');
+      } else {
+        addToHistory(`You can't unlock the ${objectName}.`, 'game');
+        addToHistory("", 'game');
+      }
       return;
     }
 
@@ -408,7 +791,7 @@ export default function TextAdventure() {
     }
 
     if (obj.use) {
-      const result = obj.use(gameState, inventory);
+      const result = obj.use(gameState, inventory, currentArea);
       const message = typeof result === 'string' ? result : result.message;
       addToHistory(message, 'game');
       
@@ -516,7 +899,7 @@ export default function TextAdventure() {
 
         {/* Version Footer */}
         <footer className="mt-8 text-center">
-          <p className="text-muted text-xs">Text Adventure v0.01</p>
+          <p className="text-muted text-xs">Text Adventure v0.02</p>
         </footer>
       </div>
     </main>
