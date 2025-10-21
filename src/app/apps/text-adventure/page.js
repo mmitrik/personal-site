@@ -441,16 +441,6 @@ export default function TextAdventure() {
     <main className="min-h-screen bg-bg text-text">
       <div className="max-w-4xl mx-auto p-8 pt-16">
         <Header />
-        
-        {/* Back to Home Link */}
-        <div className="mb-8">
-          <Link 
-            href="/" 
-            className="text-muted hover:text-accent inline-flex items-center"
-          >
-            ← Back to Home
-          </Link>
-        </div>
 
         {/* Game Section */}
         <section className="bg-surface p-10 rounded-2xl shadow-sm">
