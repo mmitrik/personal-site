@@ -108,7 +108,7 @@ Then visit:
 - [x] Click-Miner style game 
 - [ ] Pixel draw utility for creating pixel art assets to be used in games
 - [ ] Pokemon Trader card trading game with arbitrage mechanics
-- [ ] Zork-style text adventure game using AI generated world
+- [x] Zork-style text adventure game using AI generated world
     - [ ] Implement an AI player that plays the game
 
 ### New Project Ideas
@@ -118,6 +118,7 @@ Then visit:
 ### App Improvement Ideas
 - [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)
 - [Ore Miner ideas](src/app/apps/ore-miner/readme.md)
+- [Text Adventure ideas](/src/app/apps/text-adventure/readme.md)
 
 ---
 

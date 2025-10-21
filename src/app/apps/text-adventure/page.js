@@ -366,7 +366,7 @@ export default function TextAdventure() {
   const areas = {
     field: {
       name: 'Field',
-      description: "You're standing in a large green field with grasses and other low-lying plants growing all around. A small white house with a red door is nearby. A mailbox stands near the house.",
+      description: "You're standing in a large green field with grasses and other low-lying plants growing all around. A small white house with a red door is nearby. A mailbox stands near the house. Behind the house, you can glimpse a small garden. To the west, a dense forest stretches into the distance.",
       connections: {
         'kitchen': ['go to house', 'enter house', 'go to door', 'open door', 'go inside', 'go north'],
         'backyard': ['go around house', 'go behind house', 'go to backyard', 'go back'],
