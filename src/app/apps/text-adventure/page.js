@@ -9,6 +9,9 @@ export default function TextAdventure() {
   const [currentInput, setCurrentInput] = useState('');
   const [currentArea, setCurrentArea] = useState('field');
   const [inventory, setInventory] = useState([]);
+  const [aiMode, setAiMode] = useState(false);
+  const [aiPromptCount, setAiPromptCount] = useState(0);
+  const [aiProcessing, setAiProcessing] = useState(false);
   const textAreaRef = useRef(null);
 
   // Game objects definition with behaviors
@@ -466,6 +469,52 @@ export default function TextAdventure() {
     }
   }, [gameHistory]);
 
+  // Debug AI mode state changes
+  useEffect(() => {
+    console.log('🎛️ AI Mode state changed:', aiMode);
+  }, [aiMode]);
+
+  useEffect(() => {
+    console.log('🔢 AI Prompt count changed:', aiPromptCount);
+  }, [aiPromptCount]);
+
+  useEffect(() => {
+    console.log('⚙️ AI Processing state changed:', aiProcessing);
+  }, [aiProcessing]);
+
+  // Handle AI mode responses
+  useEffect(() => {
+    console.log('🔄 AI response effect triggered', { 
+      aiMode, 
+      aiProcessing, 
+      aiPromptCount, 
+      historyLength: gameHistory.length 
+    });
+    
+    if (aiMode && !aiProcessing && aiPromptCount < 100 && gameHistory.length > 0) {
+      const lastEntry = gameHistory[gameHistory.length - 1];
+      console.log('📜 Last history entry:', lastEntry);
+      
+      // Only trigger AI response after game responses, not AI commands or system messages
+      if (lastEntry && (lastEntry.type === 'game' || lastEntry.type === 'area' || lastEntry.type === 'description')) {
+        console.log('✅ Conditions met for AI response, setting 2s timer...');
+        const timer = setTimeout(() => {
+          console.log('⏱️ Timer expired, calling getAiCommand...');
+          getAiCommand();
+        }, 2000); // 2 second delay between AI commands
+        
+        return () => {
+          console.log('🧹 Cleaning up AI timer');
+          clearTimeout(timer);
+        };
+      } else {
+        console.log('❌ Last entry type does not trigger AI:', lastEntry?.type);
+      }
+    } else {
+      console.log('❌ AI conditions not met for response');
+    }
+  }, [gameHistory, aiMode, aiProcessing, aiPromptCount]);
+
   const addToHistory = (text, type = 'game') => {
     setGameHistory(prev => [...prev, { text, type, timestamp: Date.now() }]);
   };
@@ -475,6 +524,113 @@ export default function TextAdventure() {
     addToHistory(`--- ${area.name} ---`, 'area');
     addToHistory(area.description, 'description');
     addToHistory("", 'game');
+  };
+
+  const getAiCommand = async () => {
+    if (!aiMode || aiPromptCount >= 100 || aiProcessing) {
+      console.log('🚫 AI command skipped:', { aiMode, aiPromptCount, aiProcessing });
+      return;
+    }
+
+    console.log('🤖 Starting AI command request...');
+    console.log('📊 Current state:', { currentArea, inventoryCount: inventory.length, historyLength: gameHistory.length });
+    
+    setAiProcessing(true);
+    
+    try {
+      console.log('📤 Sending request to /api/ai-adventurer');
+      const requestPayload = {
+        gameHistory,
+        currentArea,
+        inventory
+      };
+      console.log('📦 Request payload:', requestPayload);
+      
+      const response = await fetch('/api/ai-adventurer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API request failed:', response.status, errorText);
+        throw new Error(`Failed to get AI command: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Response received:', data);
+      
+      if (data.command) {
+        console.log('🎮 AI generated command:', data.command);
+        console.log('📈 Usage stats:', data.usage);
+        
+        setAiPromptCount(prev => {
+          const newCount = prev + 1;
+          console.log('🔢 Prompt count updated:', newCount);
+          return newCount;
+        });
+        
+        addToHistory(`[AI] ${data.command}`, 'ai');
+        
+        console.log('⏰ Scheduling command execution in 1 second...');
+        // Process the AI command after a brief delay for readability
+        setTimeout(() => {
+          console.log('▶️ Executing AI command:', data.command);
+          processCommand(data.command);
+        }, 1000);
+      } else {
+        console.warn('⚠️ No command in AI response');
+      }
+    } catch (error) {
+      console.error('💥 Error getting AI command:', error);
+      console.error('Error details:', error.message, error.stack);
+      addToHistory('AI Error: Failed to get next command. AI mode disabled.', 'system');
+      setAiMode(false);
+    } finally {
+      console.log('🏁 AI processing complete');
+      setAiProcessing(false);
+    }
+  };
+
+  const toggleAiMode = () => {
+    console.log('🔄 toggleAiMode called, current state:', { aiMode, aiProcessing, aiPromptCount });
+    
+    if (!aiMode) {
+      console.log('🟢 Enabling AI Adventurer mode...');
+      console.log('📝 Setting aiPromptCount to 0');
+      setAiPromptCount(0);
+      console.log('📝 Setting aiMode to true');
+      setAiMode(true);
+      
+      console.log('🚫 Skipping system messages to avoid blocking AI response');
+      // Don't add system messages that would block AI response
+      // addToHistory('=== AI ADVENTURER MODE ENABLED ===', 'system');
+      // addToHistory('The AI will now play the game automatically.', 'system');
+      // addToHistory("", 'system');
+      
+      console.log('⏰ Scheduling first AI command in 2 seconds...');
+      // Get first AI command after a delay
+      setTimeout(() => {
+        console.log('🚀 Triggering first AI command (from timeout)...');
+        getAiCommand();
+      }, 2000);
+    } else {
+      console.log('🔴 Disabling AI Adventurer mode...');
+      console.log('📝 Setting aiMode to false');
+      setAiMode(false);
+      
+      console.log('🚫 Skipping system messages when disabling AI mode');
+      // Don't add system messages 
+      // addToHistory('=== AI ADVENTURER MODE DISABLED ===', 'system');
+      // addToHistory('You have resumed manual control.', 'system');
+      // addToHistory("", 'system');
+    }
+    console.log('✅ toggleAiMode function complete');
   };
 
   const processCommand = (command) => {
@@ -491,6 +647,7 @@ export default function TextAdventure() {
       addToHistory("• Objects: use [object], sit on [object], read [object]", 'game');
       addToHistory("• Actions: open [object], unlock [object], dig", 'game');
       addToHistory("• Inventory: inventory, check inventory", 'game');
+      addToHistory("• AI Mode: Toggle the AI Adventurer button to watch an AI play", 'game');
       addToHistory("• Other: help", 'game');
       addToHistory("", 'game');
       return;
@@ -807,7 +964,7 @@ export default function TextAdventure() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (currentInput.trim()) {
+    if (currentInput.trim() && !aiMode) {
       processCommand(currentInput);
       setCurrentInput('');
     }
@@ -847,6 +1004,7 @@ export default function TextAdventure() {
               {gameHistory.map((entry, index) => (
                 <div key={index} className={`
                   ${entry.type === 'user' ? 'text-yellow-300 font-bold' : ''}
+                  ${entry.type === 'ai' ? 'text-purple-300 font-bold' : ''}
                   ${entry.type === 'system' ? 'text-cyan-300' : ''}
                   ${entry.type === 'area' ? 'text-white font-bold text-base' : ''}
                   ${entry.type === 'description' ? 'text-green-300' : ''}
@@ -866,11 +1024,48 @@ export default function TextAdventure() {
                 value={currentInput}
                 onChange={(e) => setCurrentInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent text-green-400 outline-none font-mono placeholder-green-600"
-                placeholder="Enter your command..."
-                autoFocus
+                disabled={aiMode}
+                className={`flex-1 bg-transparent outline-none font-mono ${
+                  aiMode 
+                    ? 'text-purple-300 placeholder-purple-600 cursor-not-allowed' 
+                    : 'text-green-400 placeholder-green-600'
+                }`}
+                placeholder={aiMode ? 'AI is playing...' : 'Enter your command...'}
+                autoFocus={!aiMode}
               />
             </form>
+          </div>
+
+          {/* AI Mode Controls */}
+          <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-purple-900 mb-1">🤖 AI Adventurer Mode</h3>
+                <p className="text-purple-700 text-sm">
+                  Let an AI agent play the game automatically. 
+                  {aiMode && (
+                    <span className="ml-2">
+                      Prompts used: {aiPromptCount}/100
+                      {aiProcessing && <span className="ml-2 text-purple-600">● Thinking...</span>}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  console.log('🔘 AI toggle button clicked, current aiMode:', aiMode);
+                  toggleAiMode();
+                }}
+                disabled={aiProcessing}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                  aiMode
+                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                } ${aiProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {aiMode ? 'Disable AI' : 'Enable AI'}
+              </button>
+            </div>
           </div>
 
           {/* Game Info */}
@@ -899,7 +1094,7 @@ export default function TextAdventure() {
 
         {/* Version Footer */}
         <footer className="mt-8 text-center">
-          <p className="text-muted text-xs">Text Adventure v0.02</p>
+          <p className="text-muted text-xs">Text Adventure v0.03</p>
         </footer>
       </div>
     </main>
