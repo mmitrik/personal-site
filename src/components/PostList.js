@@ -121,10 +121,10 @@ export default function PostList({ posts, setPosts, user }) {
 
       {/* Refresh button */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="text-xl font-semibold text-text">
           Recent Posts
           {posts.length > 0 && (
-            <span className="text-sm font-normal text-gray-500 ml-2">
+            <span className="text-sm font-normal text-muted ml-2">
               ({posts.length} post{posts.length !== 1 ? 's' : ''})
             </span>
           )}
@@ -133,7 +133,7 @@ export default function PostList({ posts, setPosts, user }) {
         <button
           onClick={refreshPosts}
           disabled={loading}
-          className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center px-3 py-2 text-sm text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
             className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`}
@@ -155,11 +155,11 @@ export default function PostList({ posts, setPosts, user }) {
       {/* Posts list */}
       {posts.length === 0 && !loading ? (
         <div className="text-center py-12">
-          <div className="text-gray-500 mb-4">
+          <div className="text-muted mb-4">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <p className="text-lg font-medium">No posts yet</p>
+            <p className="text-lg font-medium text-text">No posts yet</p>
             <p className="text-sm">Be the first to share something!</p>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function PostList({ posts, setPosts, user }) {
       {/* Loading indicator for refresh */}
       {loading && posts.length > 0 && (
         <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
         </div>
       )}
     </div>

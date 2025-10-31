@@ -3,6 +3,11 @@ import Header from "../../components/Header";
 
 const projects = [
     {
+        title: "Posts",
+        description: "A micro-blogging platform with user authentication, markdown support, and real-time posts. Share your thoughts, ideas, and updates with the community using Supabase backend.",
+        link: "/apps/posts",
+    },
+    {
         title: "Compliment Generator",
         description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
         link: "/apps/compliments",
