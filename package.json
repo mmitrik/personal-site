@@ -4,11 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
+    "build:turbo": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vercel": "vercel",
+    "vercel:prod": "vercel --prod"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.78.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
     "next": "15.5.4",
     "react": "19.1.0",

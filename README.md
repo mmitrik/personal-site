@@ -68,18 +68,79 @@ Once DNS is propagated, Vercel automatically issues SSL and connects both `www` 
 
 ## 🧰 Local Development
 
-To run locally:
+### Initial Setup
 
-```bash
-# Install dependencies
-npm install
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd personal-site
+   ```
 
-# Run dev server
-npm run dev
-````
+2. **Install dependencies**
+   ```bash
+   npm install
+   # Install Supabase client for the micro-blogging backend
+   npm install @supabase/supabase-js
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   # Copy the environment template
+   cp .env.local.example .env.local
+   ```
+   
+   Then edit `.env.local` and add your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
+   
+   **Where to find these values:**
+   - Go to your [Supabase Dashboard](https://app.supabase.com)
+   - Select your project → Settings → API
+   - Copy the Project URL and anon public key
+   - Copy the service_role key (keep this secret!)
+
+4. **Set up the database**
+   - Go to your Supabase Dashboard → SQL Editor
+   - Copy and run the SQL commands from `sql/policies.sql`
+   - This creates the `posts` table and sets up Row Level Security policies
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
 Then visit:
 👉 [http://localhost:3000](http://localhost:3000)
+
+### 🗄️ Micro-Blogging Backend
+
+The project includes a complete backend for micro-blogging with:
+
+- **API Routes:** `/api/posts` (GET, POST, PUT, DELETE)
+- **Authentication:** Supabase Auth integration
+- **Database:** PostgreSQL with Row Level Security
+- **TypeScript:** Fully typed API responses and database schemas
+
+**API Endpoints:**
+- `GET /api/posts` - Fetch all posts (public)
+- `POST /api/posts` - Create post (requires auth)
+- `PUT /api/posts` - Update post (requires auth + ownership)
+- `DELETE /api/posts?id=<post-id>` - Delete post (requires auth + ownership)
+
+**Testing the API:**
+```bash
+# Get all posts
+curl http://localhost:3000/api/posts
+
+# Create a post (requires Bearer token from Supabase Auth)
+curl -X POST http://localhost:3000/api/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-supabase-jwt>" \
+  -d '{"content": "Hello, world!"}'
+```
 
 ---
 

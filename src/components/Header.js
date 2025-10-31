@@ -13,6 +13,9 @@ export default function Header() {
         <Link href="/projects" className="hover:text-accent">
           Projects
         </Link>
+        <Link href="/posts" className="hover:text-accent">
+          Posts
+        </Link>
         <Link href="/contact" className="hover:text-accent">
           Contact
         </Link>
