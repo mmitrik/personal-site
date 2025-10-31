@@ -2,14 +2,15 @@
 
 ## Pre-Deployment Checklist
 
-### Environment Variables
-Add these to Vercel Dashboard → Settings → Environment Variables:
+### Environment Variables (CRITICAL STEP)
+Add these to Vercel Dashboard → Project Settings → Environment Variables:
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://vtjhoyuwvqjblxnnbboh.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=[your-anon-key-from-.env.local]
-SUPABASE_SERVICE_ROLE_KEY=[your-service-role-key-from-.env.local]
-```
+**Set each variable individually:**
+1. `NEXT_PUBLIC_SUPABASE_URL` = `https://vtjhoyuwvqjblxnnbboh.supabase.co`
+2. `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `[copy from your .env.local file]`
+3. `SUPABASE_SERVICE_ROLE_KEY` = `[copy from your .env.local file]`
+
+**Important:** Set all variables for "Production", "Preview", and "Development" environments.
 
 ### Supabase Configuration
 1. Go to Supabase Dashboard → Settings → Authentication
