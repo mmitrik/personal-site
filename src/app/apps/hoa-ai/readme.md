@@ -131,15 +131,15 @@ The AI assistant is trained to help with:
 
 ## 🚀 Future Enhancements
 
-- **Document Upload**: Allow users to upload specific HOA documents for analysis
-- **Meeting Minutes Integration**: Connect to HOA meeting recordings and minutes
-- **Notification System**: Alerts for important HOA announcements
-- **Multi-Language Support**: Spanish and other community languages
-- **Voice Input**: Speech-to-text for accessibility
-- **Advanced Search**: Search through uploaded HOA documents
-- **Community Portal**: Integration with HOA management platforms
-- **Mobile App**: Native iOS/Android applications
-- **Analytics Dashboard**: Usage statistics and common question trends
+- [ ] **Document Upload**: Allow users to upload specific HOA documents for analysis
+- [ ] **Meeting Minutes Integration**: Connect to HOA meeting recordings and minutes
+- [ ] **Notification System**: Alerts for important HOA announcements
+- [ ] **Multi-Language Support**: Spanish and other community languages
+- [ ] **Voice Input**: Speech-to-text for accessibility
+- [ ] **Advanced Search**: Search through uploaded HOA documents
+- [ ] **Community Portal**: Integration with HOA management platforms
+- [ ] **Mobile App**: Native iOS/Android applications
+- [ ] **Analytics Dashboard**: Usage statistics and common question trends
 
 ## 🧪 Development Notes
 
