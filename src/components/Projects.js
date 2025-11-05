@@ -2,16 +2,16 @@ import Link from 'next/link';
 
 const featuredProjects = [
   {
-    title: "Compliment Generator",
-    description: "A cheerful React app that generates random compliments with smooth animations to brighten your day.",
-    link: "/apps/compliments",
-    tech: "React, Framer Motion, Tailwind CSS"
+    title: "Posts",
+    description: "A micro-blogging platform with real-time authentication, markdown support, and character limits for quick thoughts.",
+    link: "/apps/posts",
+    tech: "Next.js, Supabase, TypeScript, React"
   },
   {
-    title: "Personal Website",
-    description: "This very website - built with Next.js and a custom design system for consistency and maintainability.",
-    link: "/",
-    tech: "Next.js, Tailwind CSS, Design System"
+    title: "Text Adventure",
+    description: "An interactive text-based adventure game where your choices shape the story in a mysterious world.",
+    link: "/apps/text-adventure",
+    tech: "React, JavaScript, Interactive Fiction"
   }
 ];
 
