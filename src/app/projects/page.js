@@ -3,6 +3,11 @@ import Header from "../../components/Header";
 
 const projects = [
     {
+        title: "HOA AI Assistant",
+        description: "An AI-powered chatbot for homeowners associations that answers questions about bylaws, policies, and procedures. Built with Azure AI Foundry and provides real-time assistance for community living.",
+        link: "/apps/hoa-ai",
+    },
+    {
         title: "Posts",
         description: "A micro-blogging platform with user authentication, markdown support, and real-time posts. Share your thoughts, ideas, and updates with the community using Supabase backend.",
         link: "/apps/posts",
