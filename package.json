@@ -12,6 +12,7 @@
     "vercel:prod": "vercel --prod"
   },
   "dependencies": {
+    "@azure/search-documents": "^12.2.0",
     "@supabase/supabase-js": "^2.78.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",

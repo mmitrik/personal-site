@@ -8,7 +8,7 @@ export default function HoaAi() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your HOA AI Assistant. I can help answer questions about homeowner association bylaws, policies, and procedures. What would you like to know?'
+      content: 'Hello! I&apos;m your HOA AI Assistant. I can answer questions based on your community&apos;s official HOA bylaws. I search through the actual bylaws document to provide accurate, cited answers. What would you like to know about your HOA policies and procedures?'
     }
   ]);
   const [currentInput, setCurrentInput] = useState('');
@@ -48,14 +48,14 @@ export default function HoaAi() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/hoa-ai', {
+      // Use the new RAG endpoint
+      const response = await fetch('/api/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          messages: newMessages,
-          userPrompt: userMessage 
+          question: userMessage 
         }),
       });
 
@@ -65,10 +65,27 @@ export default function HoaAi() {
 
       const data = await response.json();
       
+      // Format AI response with sources if available
+      let assistantContent = data.response;
+      
+      // Add source citations if available
+      if (data.sources && data.sources.length > 0) {
+        const citations = data.sources
+          .map(source => `Section ${source.sectionNumber}${source.sectionTitle ? ` - ${source.sectionTitle}` : ''}`)
+          .join(', ');
+        
+        assistantContent += `\n\n**Sources:** ${citations}`;
+      }
+      
+      // Add metadata about retrieval
+      if (data.retrievedChunks > 0) {
+        assistantContent += `\n\n*Based on ${data.retrievedChunks} relevant section${data.retrievedChunks === 1 ? '' : 's'} from the HOA bylaws.*`;
+      }
+      
       // Add AI response to conversation
       setMessages([...newMessages, { 
         role: 'assistant', 
-        content: data.response 
+        content: assistantContent 
       }]);
 
     } catch (error) {
@@ -208,7 +225,7 @@ export default function HoaAi() {
         {/* Info Section */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-blue-800 text-sm">
-            <strong>🏠 How it Works:</strong> This AI assistant is trained on homeowner association knowledge and can help answer questions about bylaws, architectural guidelines, fee structures, meeting procedures, and common HOA policies. Ask specific questions for the best results!
+            <strong>🏠 How it Works:</strong> This AI assistant searches through your actual HOA bylaws document to provide accurate, cited answers. It only uses information from the official bylaws and will tell you if something isn&apos;t covered. Responses include section numbers for easy verification. Ask specific questions for the best results!
           </p>
         </div>
 
