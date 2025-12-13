@@ -2,6 +2,7 @@
   "name": "personal-site",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -9,14 +10,20 @@
     "start": "next start",
     "lint": "eslint",
     "vercel": "vercel",
-    "vercel:prod": "vercel --prod"
+    "vercel:prod": "vercel --prod",
+    "ingest:preview": "node scripts/ingest.js --dry-run",
+    "ingest": "node scripts/ingest.js",
+    "ingest:clear": "node scripts/ingest.js --clear",
+    "ingest:stats": "node scripts/ingest.js --stats",
+    "test:retrieval": "node tests/retrieval.test.js"
   },
   "dependencies": {
     "@azure/search-documents": "^12.2.0",
     "@supabase/supabase-js": "^2.78.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.23.24",
-    "next": "15.5.4",
+    "next": "^15.5.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0"

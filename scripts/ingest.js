@@ -15,6 +15,10 @@
  *   --help      Show this help message
  */
 
+// Load environment variables from .env.local
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';

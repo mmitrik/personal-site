@@ -174,12 +174,15 @@ curl -X POST http://localhost:3000/api/posts \
 
 ### New Project Ideas
 - [Generated ideas](ideas/ideas.md)
-- [ ] Micro-blogging platform (capture ideas from learning sessions)
+- [x] Micro-blogging platform (capture ideas from learning sessions) - [Posts readme](src/app/apps/posts/readme.md)
+- [x] HOA AI Assistant - [HOA AI readme](src/app/apps/hoa-ai/readme.md) - RAG-powered assistant for HOA bylaws
 
 ### App Improvement Ideas
 - [Idea Spinner ideas](src/app/apps/idea-spinner/readme.md)
 - [Ore Miner ideas](src/app/apps/ore-miner/readme.md)
 - [Text Adventure ideas](/src/app/apps/text-adventure/readme.md)
+- [HOA AI Assistant improvements](src/app/apps/hoa-ai/readme.md) - [RAG Implementation Guide](RAG_IMPLEMENTATION.md)
+
 
 ---
 

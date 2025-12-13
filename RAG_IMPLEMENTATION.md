@@ -13,7 +13,7 @@ Azure AI Search (Vector Search)
      ↓
 Retrieved Bylaw Sections
      ↓
-Azure OpenAI (GPT-4o-mini) + Context
+Azure OpenAI (gpt-5-mini reasoning model) + Context
      ↓
 Accurate Answer with Citations
 ```
@@ -49,19 +49,18 @@ yarn add @azure/search-documents
 Copy `.env.local.example` to `.env.local` and fill in your Azure credentials:
 
 ```bash
-# Azure OpenAI for embeddings and chat
-AZURE_OPENAI_ENDPOINT=https://your-openai-resource.openai.azure.com
-AZURE_OPENAI_API_KEY=your-openai-api-key
-
 # Azure AI Search for vector storage
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
 AZURE_SEARCH_KEY=your-search-admin-key
 AZURE_SEARCH_INDEX_NAME=hoa-bylaws-index
 
-# HOA AI specific configuration
+# HOA AI specific configuration (Azure OpenAI)
 AZURE_HOA_AI_ENDPOINT=https://your-hoa-ai-resource.openai.azure.com
 AZURE_HOA_AI_API_KEY=your-hoa-ai-api-key
-AZURE_HOA_AI_DEPLOYMENT_NAME=gpt-4o-mini
+AZURE_HOA_AI_DEPLOYMENT_NAME=gpt-5-mini
+
+# Embedding model deployment
+AZURE_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 ```
 
 ### 3. Ingest Your Bylaws
@@ -100,22 +99,23 @@ Visit `http://localhost:3000/apps/hoa-ai` to use the RAG-enhanced assistant.
 ## 🔧 Key Components
 
 ### Text Chunking (`lib/chunking.js`)
-- Splits bylaws into ~1000 character chunks with 200 character overlap
+- Splits bylaws into ~1500 character chunks with 300 character overlap
 - Preserves section structure and metadata
-- Extracts section numbers and titles automatically
-- Handles legal document formatting
+- Extracts section numbers and titles automatically (ARTICLE patterns, lettered subsections, numbered sections)
+- Handles legal document formatting with smart boundary detection
 
 ### Azure Integration (`lib/azureSearch.js`)
-- **Embeddings**: Uses `text-embedding-3-large` for high-quality vector representations
-- **Vector Search**: Semantic similarity search through bylaws content
-- **Hybrid Search**: Combines vector and keyword search for best results
+- **Embeddings**: Uses `text-embedding-ada-002` (1536 dimensions) for vector representations
+- **Vector Search**: Semantic similarity search through bylaws content using HNSW algorithm
 - **Index Management**: Automatic schema creation and document upload
+- **Basic Tier Compatible**: Works with Azure Search Basic tier (no semantic search features)
 
 ### RAG API (`src/app/api/ask/route.js`)
-- Retrieves top 5 most relevant bylaw sections
-- Provides structured context to GPT-4o-mini
+- Retrieves top 8 most relevant bylaw sections (configurable)
+- Provides structured context to gpt-5-mini reasoning model
 - Enforces bylaws-only responses with citations
-- Returns section numbers and source references
+- Returns section numbers, source references, and content excerpts
+- Allocates 4000 tokens for reasoning + output (gpt-5-mini specific)
 
 ### Ingestion Script (`scripts/ingest.js`)
 - CLI tool for processing and uploading bylaws
@@ -126,16 +126,17 @@ Visit `http://localhost:3000/apps/hoa-ai` to use the RAG-enhanced assistant.
 ## 📊 Performance Optimization
 
 ### Chunking Strategy
-- **Chunk Size**: 1000 characters balances context and precision
-- **Overlap**: 200 characters prevents information loss at boundaries
-- **Metadata**: Section numbers enable precise citations
-- **Filtering**: Legal term detection improves relevance scoring
+- **Chunk Size**: 1500 characters balances context and precision
+- **Overlap**: 300 characters prevents information loss at boundaries
+- **Metadata**: Section numbers enable precise citations (ARTICLE I, II, etc.)
+- **Filtering**: Legal term detection and smart boundary detection for sentence/paragraph breaks
 
 ### Search Configuration
-- **Top-K**: Retrieves 5 most relevant chunks per query
-- **Threshold**: 0.7 similarity score minimum for quality results
-- **Vector Dimensions**: 3072 dimensions for high precision
+- **Top-K**: Retrieves 8 most relevant chunks per query (increased for better context)
+- **Threshold**: 0.5 similarity score minimum (lowered to catch more relevant chunks)
+- **Vector Dimensions**: 1536 dimensions (text-embedding-ada-002)
 - **Algorithm**: HNSW for fast approximate search
+- **Model**: gpt-5-mini reasoning model with 4000 token budget
 
 ### Caching Strategy
 - **Embedding Caching**: Avoid re-computing embeddings for identical queries
@@ -173,7 +174,7 @@ Q: "How are HOA fees calculated?"
 A: "Annual assessments are fixed by the Board and payable in monthly installments on the first day of each month (Section 7.2)..."
 
 Sources: Section 7.2 - Annual Assessments
-Based on 3 relevant sections from the HOA bylaws.
+Based on 8 relevant sections from the HOA bylaws.
 ```
 
 ### Specific Policy Questions  
@@ -213,6 +214,29 @@ Based on 4 relevant sections from the HOA bylaws.
 - Rate limiting for API endpoints
 - Monitor usage patterns
 - Audit log access and queries
+
+## ⚙️ gpt-5-mini Specific Configuration
+
+### Reasoning Model Requirements
+The system uses Azure OpenAI's **gpt-5-mini reasoning model**, which has special requirements:
+
+- **Token Budget**: Uses `max_completion_tokens` (not `max_tokens`) set to 4000
+- **No Temperature**: Temperature parameter is not supported by reasoning models
+- **Reasoning Tokens**: Model uses internal reasoning tokens (up to ~2000) before generating output
+- **Output Tokens**: Remaining tokens (~2000) used for actual response text
+- **Empty Responses**: If reasoning uses all tokens, increase `maxResponseTokens` in RAG_CONFIG
+
+### Token Usage Pattern
+```json
+{
+  "completion_tokens": 2500,
+  "reasoning_tokens": 1800,
+  "output_tokens": 700,
+  "prompt_tokens": 2700
+}
+```
+
+If you see empty responses with high reasoning token usage, the model consumed all allocated tokens for reasoning. Increase `maxResponseTokens` in `src/app/api/ask/route.js`.
 
 ## 🚨 Troubleshooting
 

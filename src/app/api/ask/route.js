@@ -13,11 +13,11 @@ import { searchDocuments } from '../../../../lib/azureSearch';
  */
 const RAG_CONFIG = {
   // Retrieval settings
-  maxRetrievedChunks: 5,
-  minSimilarityScore: 0.7,
+  maxRetrievedChunks: 8, // Increased from 5 to get more context
+  minSimilarityScore: 0.5, // Lowered from 0.7 to catch more relevant chunks
   
   // Response generation settings
-  maxResponseTokens: 800,
+  maxResponseTokens: 4000, // gpt-5-mini reasoning model: needs budget for reasoning (up to 2000) + output (500-2000)
   includeSourceCitations: true,
   
   // Content filtering
@@ -45,10 +45,12 @@ You are an expert HOA assistant that answers questions based EXCLUSIVELY on the 
 
 ## CRITICAL INSTRUCTIONS:
 1. **ONLY use information from the provided bylaws context below**
-2. **If the answer is not in the context, respond with "I don't know" or "This information is not available in the bylaws"**
-3. **Always cite specific section numbers when referencing bylaws**
-4. **Provide accurate, helpful responses in a professional tone**
-5. **Do not make assumptions or provide general HOA advice not in the bylaws**
+2. **Search carefully through ALL provided context sections for the answer**
+3. **If the answer is not in the context after thorough review, respond with "I don't know" or "This information is not available in the bylaws"**
+4. **Always cite specific section numbers (e.g., Article I, Section C) when referencing bylaws**
+5. **Provide accurate, helpful responses in a professional tone**
+6. **Do not make assumptions or provide general HOA advice not in the bylaws**
+7. **For questions about names, dates, or specific details, look for exact matches in the context**
 
 ## RESPONSE FORMAT:
 - Start with a direct answer to the question
@@ -56,6 +58,11 @@ You are an expert HOA assistant that answers questions based EXCLUSIVELY on the 
 - Be concise but comprehensive
 - If multiple sections apply, mention all relevant ones
 - End with a note about consulting the full bylaws document for complete details
+
+## EXAMPLE RESPONSES:
+**Good:** "The Association is named 'Birchwood/Springmeadow Park Homeowners Association' (Article I, Section C)."
+**Good:** "According to Article VII, Section R.1, no trailers, boats, RVs, or commercial vehicles may be parked in the subdivision except within a private attached garage."
+**Avoid:** Generic answers without citing specific sections or paraphrasing when exact quotes would be better.
 
 ## HOA BYLAWS CONTEXT:
 ${contextSections}
@@ -75,12 +82,22 @@ ${contextSections}
  */
 async function generateResponse(userQuestion, retrievedChunks) {
   // Check for required environment variables
-  const endpoint = process.env.AZURE_HOA_AI_ENDPOINT;
+  const rawEndpoint = process.env.AZURE_HOA_AI_ENDPOINT;
   const apiKey = process.env.AZURE_HOA_AI_API_KEY;
-  const deploymentName = process.env.AZURE_HOA_AI_DEPLOYMENT_NAME || 'gpt-4o-mini';
+  const deploymentName = process.env.AZURE_HOA_AI_DEPLOYMENT_NAME;
 
-  if (!endpoint || !apiKey) {
-    throw new Error('Azure OpenAI configuration missing');
+  const endpoint = rawEndpoint ? rawEndpoint.replace(/\/+$/, '') : rawEndpoint;
+
+  console.log('🔧 AI Config:', {
+    endpoint,
+    deploymentName: deploymentName ?? null,
+    hasApiKey: !!apiKey,
+  });
+
+  if (!endpoint || !apiKey || !deploymentName) {
+    throw new Error(
+      'Azure HOA AI configuration missing. Ensure AZURE_HOA_AI_ENDPOINT, AZURE_HOA_AI_API_KEY, and AZURE_HOA_AI_DEPLOYMENT_NAME are set (and restart the dev server after changing .env.local).'
+    );
   }
 
   // Build the conversation with system prompt and user question
@@ -100,6 +117,16 @@ async function generateResponse(userQuestion, retrievedChunks) {
   // Construct the Azure OpenAI API URL
   const url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`;
 
+  const requestBody = {
+    messages: messages,
+    max_completion_tokens: RAG_CONFIG.maxResponseTokens,
+    // Note: gpt-5-mini only supports default temperature (1), so we omit it
+    stream: false
+  };
+
+  console.log('🌐 API URL:', url);
+  console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
+
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -107,11 +134,7 @@ async function generateResponse(userQuestion, retrievedChunks) {
         'Content-Type': 'application/json',
         'api-key': apiKey,
       },
-      body: JSON.stringify({
-        messages: messages,
-        max_completion_tokens: RAG_CONFIG.maxResponseTokens,
-        // Note: gpt-5-mini only supports default parameters
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -122,10 +145,17 @@ async function generateResponse(userQuestion, retrievedChunks) {
 
     const data = await response.json();
     
+    console.log('🔍 AI API Response data:', JSON.stringify(data, null, 2));
+    console.log('🔍 Choices:', data.choices);
+    console.log('🔍 First choice:', data.choices?.[0]);
+    console.log('🔍 Message:', data.choices?.[0]?.message);
+    console.log('🔍 Content:', data.choices?.[0]?.message?.content);
+    
     const aiResponse = data.choices?.[0]?.message?.content || 
       'I apologize, but I could not generate a response. Please try again.';
 
     console.log('✅ RAG response generated successfully');
+    console.log('📊 AI Response length:', aiResponse?.length);
     console.log('📊 Token usage:', data.usage);
 
     return aiResponse;
@@ -157,17 +187,19 @@ function formatResponseWithCitations(aiResponse, retrievedChunks) {
     .map(chunk => ({
       sectionNumber: chunk.sectionNumber,
       sectionTitle: chunk.sectionTitle,
+      content: chunk.content,
       relevanceScore: chunk.score,
     }));
 
   // Add fallback sources if no specific citations found
+  // Show all retrieved chunks that were used for context
   if (sources.length === 0 && retrievedChunks.length > 0) {
     sources.push(...retrievedChunks
       .filter(chunk => chunk.sectionNumber)
-      .slice(0, 3)
       .map(chunk => ({
         sectionNumber: chunk.sectionNumber,
         sectionTitle: chunk.sectionTitle,
+        content: chunk.content,
         relevanceScore: chunk.score,
       }))
     );
@@ -289,6 +321,7 @@ export async function GET() {
     // Check if required environment variables are set
     const hasOpenAI = !!(process.env.AZURE_HOA_AI_ENDPOINT && process.env.AZURE_HOA_AI_API_KEY);
     const hasSearch = !!(process.env.AZURE_SEARCH_ENDPOINT && process.env.AZURE_SEARCH_KEY);
+    const hoaAiDeploymentName = process.env.AZURE_HOA_AI_DEPLOYMENT_NAME || null;
     
     const status = {
       service: 'HOA AI Assistant RAG API',
@@ -303,6 +336,7 @@ export async function GET() {
         maxRetrievedChunks: RAG_CONFIG.maxRetrievedChunks,
         minSimilarityScore: RAG_CONFIG.minSimilarityScore,
         maxResponseTokens: RAG_CONFIG.maxResponseTokens,
+        hoaAiDeploymentName,
       },
       endpoints: {
         ask: 'POST /api/ask',

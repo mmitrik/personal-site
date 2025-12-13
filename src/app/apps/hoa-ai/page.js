@@ -14,6 +14,7 @@ export default function HoaAi() {
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [expandedSources, setExpandedSources] = useState({});
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -65,27 +66,12 @@ export default function HoaAi() {
 
       const data = await response.json();
       
-      // Format AI response with sources if available
-      let assistantContent = data.response;
-      
-      // Add source citations if available
-      if (data.sources && data.sources.length > 0) {
-        const citations = data.sources
-          .map(source => `Section ${source.sectionNumber}${source.sectionTitle ? ` - ${source.sectionTitle}` : ''}`)
-          .join(', ');
-        
-        assistantContent += `\n\n**Sources:** ${citations}`;
-      }
-      
-      // Add metadata about retrieval
-      if (data.retrievedChunks > 0) {
-        assistantContent += `\n\n*Based on ${data.retrievedChunks} relevant section${data.retrievedChunks === 1 ? '' : 's'} from the HOA bylaws.*`;
-      }
-      
-      // Add AI response to conversation
+      // Add AI response to conversation with structured data
       setMessages([...newMessages, { 
         role: 'assistant', 
-        content: assistantContent 
+        content: data.response,
+        sources: data.sources || [],
+        retrievedChunks: data.retrievedChunks || 0
       }]);
 
     } catch (error) {
@@ -112,6 +98,13 @@ export default function HoaAi() {
       e.preventDefault();
       handleSubmit(e);
     }
+  };
+
+  const toggleSources = (messageIndex) => {
+    setExpandedSources(prev => ({
+      ...prev,
+      [messageIndex]: !prev[messageIndex]
+    }));
   };
 
   return (
@@ -151,9 +144,52 @@ export default function HoaAi() {
                       }`}
                     >
                       {message.role === 'assistant' ? (
-                        <div className="prose prose-sm max-w-none prose-headings:text-text prose-strong:text-text prose-code:text-accent prose-code:bg-bg prose-code:px-1 prose-code:rounded text-text">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
-                        </div>
+                        <>
+                          <div className="prose prose-sm max-w-none prose-headings:text-text prose-strong:text-text prose-code:text-accent prose-code:bg-bg prose-code:px-1 prose-code:rounded text-text">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                          
+                          {/* Sources Section */}
+                          {message.sources && message.sources.length > 0 && (
+                            <div className="mt-4 pt-3 border-t border-border">
+                              <button
+                                onClick={() => toggleSources(index)}
+                                className="flex items-center gap-2 text-xs text-muted hover:text-text transition-colors"
+                              >
+                                <span className={`transform transition-transform ${expandedSources[index] ? 'rotate-90' : ''}`}>
+                                  ▶
+                                </span>
+                                <span className="font-medium">
+                                  Sources ({message.sources.length} section{message.sources.length === 1 ? '' : 's'})
+                                </span>
+                              </button>
+                              
+                              {expandedSources[index] && (
+                                <div className="mt-2 space-y-2 text-xs text-muted">
+                                  {message.sources.map((source, idx) => (
+                                    <div key={idx} className="pl-4 py-1">
+                                      <div className="font-medium text-text">
+                                        Section {source.sectionNumber}
+                                        {source.sectionTitle && ` - ${source.sectionTitle}`}
+                                      </div>
+                                      {source.content && (
+                                        <div className="mt-1 text-[11px] line-clamp-3">
+                                          {source.content}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {message.retrievedChunks > 0 && (
+                                <div className="mt-2 text-[11px] text-muted italic">
+                                  Based on {message.retrievedChunks} relevant section{message.retrievedChunks === 1 ? '' : 's'} from the HOA bylaws
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <div className="whitespace-pre-wrap">{message.content}</div>
                       )}
@@ -189,7 +225,7 @@ export default function HoaAi() {
 
             {/* Input Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <textarea
                   ref={inputRef}
                   value={currentInput}
@@ -200,11 +236,11 @@ export default function HoaAi() {
                   rows={3}
                   disabled={isLoading}
                 />
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 w-full sm:w-auto">
                   <button
                     type="submit"
                     disabled={isLoading || !currentInput.trim()}
-                    className="bg-accent text-white px-6 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-accent text-white px-6 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
                     {isLoading ? 'Sending...' : 'Send'}
                   </button>
@@ -212,7 +248,7 @@ export default function HoaAi() {
                     type="button"
                     onClick={clearConversation}
                     disabled={isLoading}
-                    className="bg-border text-text px-6 py-2 rounded-lg hover:bg-surface disabled:opacity-50"
+                    className="bg-border text-text px-6 py-2 rounded-lg hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
                     Clear
                   </button>
@@ -223,9 +259,9 @@ export default function HoaAi() {
         </section>
 
         {/* Info Section */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-800 text-sm">
-            <strong>🏠 How it Works:</strong> This AI assistant searches through your actual HOA bylaws document to provide accurate, cited answers. It only uses information from the official bylaws and will tell you if something isn&apos;t covered. Responses include section numbers for easy verification. Ask specific questions for the best results!
+        <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800 text-sm">
+            <strong>💡 How it Works:</strong> This AI assistant searches through your actual HOA bylaws document to provide accurate, cited answers. It only uses information from the official bylaws and will tell you if something isn&apos;t covered. Responses include section numbers for easy verification. Ask specific questions for the best results!
           </p>
         </div>
 
@@ -235,28 +271,28 @@ export default function HoaAi() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <button
               onClick={() => setCurrentInput('What are the architectural approval requirements?')}
-              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text"
+              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               • What are the architectural approval requirements?
             </button>
             <button
               onClick={() => setCurrentInput('How are HOA fees calculated and collected?')}
-              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text"
+              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               • How are HOA fees calculated and collected?
             </button>
             <button
               onClick={() => setCurrentInput('What are the rules about parking and vehicles?')}
-              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text"
+              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               • What are the rules about parking and vehicles?
             </button>
             <button
               onClick={() => setCurrentInput('How do I file a complaint or violation report?')}
-              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text"
+              className="text-left p-2 rounded hover:bg-bg border border-border text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               • How do I file a complaint or violation report?
