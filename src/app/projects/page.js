@@ -13,6 +13,11 @@ const projects = [
         link: "/apps/posts",
     },
     {
+        title: "Pixel Prowler",
+        description: "A browser-based stealth game where you navigate through levels collecting items while avoiding enemy detection. Features patrolling guards, cover mechanics, and progressive difficulty across multiple themed environments.",
+        link: "/apps/pixel-prowler",
+    },
+    {
         title: "Compliment Generator",
         description: "A cheerful React app that generates random compliments with smooth animations to brighten your day. Built with Framer Motion and a vibrant gradient design.",
         link: "/apps/compliments",
