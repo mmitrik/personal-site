@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Header() {
   return (
-    <header className="flex items-center justify-between mb-12">
+    <header className="flex items-center justify-between mb-12 print:hidden">
       <Link href="/" className="text-2xl font-heading header-logo">
         Matthew Mitrik
       </Link>
