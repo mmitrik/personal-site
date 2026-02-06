@@ -154,6 +154,7 @@ export default function HexagonGraph() {
 
     // Collect all unique edges
     const edges = new Map();
+    const hexCenters = []; // Collect hex centers for dots style
 
     // First pass: draw fills and collect edges
     for (let row = 0; row < height; row++) {
@@ -169,6 +170,9 @@ export default function HexagonGraph() {
           centerX = startX + col * horizSpacing + (row % 2 === 1 ? horizSpacing / 2 : 0);
           centerY = startY + row * vertSpacing;
         }
+
+        // Store center point for dots style
+        hexCenters.push({ x: centerX, y: centerY });
 
         const points = getHexPoints(centerX, centerY, hexSize, orientation === 90 ? 30 : 0);
         
@@ -211,6 +215,12 @@ export default function HexagonGraph() {
         const [x, y] = vertexKey.split(',').map(Number);
         ctx.beginPath();
         ctx.arc(x, y, lineThickness * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Draw dots at each hex center
+      for (const center of hexCenters) {
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, lineThickness * 1.5, 0, Math.PI * 2);
         ctx.fill();
       }
     } else {
