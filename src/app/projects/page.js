@@ -3,6 +3,11 @@ import Header from "../../components/Header";
 
 const projects = [
     {
+        title: "Hexagon Graph Generator",
+        description: "A customizable hexagon graph paper generator with print support. Create printable hex grids with adjustable size, orientation, and page layout options for tabletop games, RPGs, and creative projects.",
+        link: "/apps/hexagon-graph",
+    },
+    {
         title: "HOA AI Assistant",
         description: "An AI-powered chatbot for homeowners associations that answers questions about bylaws, policies, and procedures. Built with Azure AI Foundry and provides real-time assistance for community living.",
         link: "/apps/hoa-ai",
