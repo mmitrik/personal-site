@@ -26,6 +26,28 @@ export default function HexagonGraph() {
   const [footerBottomLeft, setFooterBottomLeft] = useState('');
   const [footerBottomRight, setFooterBottomRight] = useState('');
   
+  // Style options
+  const [lineStyle, setLineStyle] = useState('solid');
+  const [lineColor, setLineColor] = useState('#333333');
+  const [lineThickness, setLineThickness] = useState(1);
+  const [shadingEnabled, setShadingEnabled] = useState(false);
+  const [shadingColor, setShadingColor] = useState('#d4d4d4');
+  const [shadingPattern, setShadingPattern] = useState('none'); // none, all, every-other, every-third
+  
+  // Greyscale color presets
+  const greyscalePresets = [
+    { name: 'White', value: '#ffffff' },
+    { name: 'Light Gray', value: '#d4d4d4' },
+    { name: 'Medium Gray', value: '#808080' },
+    { name: 'Dark Gray', value: '#4a4a4a' },
+    { name: 'Black', value: '#000000' },
+  ];
+  
+  // Collapsible section state
+  const [gridSettingsOpen, setGridSettingsOpen] = useState(true);
+  const [stylesOpen, setStylesOpen] = useState(false);
+  const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
+  
   const canvasRef = useRef(null);
 
   // Calculate maximum values that fit in the canvas
@@ -111,10 +133,29 @@ export default function HexagonGraph() {
     const startX = PAGE_MARGIN + offsetX;
     const startY = PAGE_MARGIN + offsetY;
 
-    // Draw hexagons
-    ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 1;
+    // Helper function to determine if cell should be shaded
+    const shouldShadeCell = (row, col) => {
+      if (!shadingEnabled || shadingPattern === 'none') return false;
+      if (shadingPattern === 'all') return true;
+      if (shadingPattern === 'every-other-row') return row % 2 === 0;
+      if (shadingPattern === 'every-other-col') return col % 2 === 0;
+      if (shadingPattern === 'every-third-row') return row % 3 === 0;
+      if (shadingPattern === 'every-third-col') return col % 3 === 0;
+      return false;
+    };
 
+    // Helper to create edge key for deduplication
+    const edgeKey = (x1, y1, x2, y2) => {
+      // Normalize edge direction so (A,B) and (B,A) produce same key
+      const p1 = `${x1.toFixed(2)},${y1.toFixed(2)}`;
+      const p2 = `${x2.toFixed(2)},${y2.toFixed(2)}`;
+      return p1 < p2 ? `${p1}-${p2}` : `${p2}-${p1}`;
+    };
+
+    // Collect all unique edges
+    const edges = new Map();
+
+    // First pass: draw fills and collect edges
     for (let row = 0; row < height; row++) {
       for (let col = 0; col < width; col++) {
         let centerX, centerY;
@@ -131,15 +172,67 @@ export default function HexagonGraph() {
 
         const points = getHexPoints(centerX, centerY, hexSize, orientation === 90 ? 30 : 0);
         
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < 6; i++) {
-          ctx.lineTo(points[i].x, points[i].y);
+        // Fill with shading if applicable (do this first, before edges)
+        if (shouldShadeCell(row, col)) {
+          ctx.fillStyle = shadingColor;
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < 6; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+          }
+          ctx.closePath();
+          ctx.fill();
         }
-        ctx.closePath();
-        ctx.stroke();
+        
+        // Collect edges (deduplicated)
+        for (let i = 0; i < 6; i++) {
+          const p1 = points[i];
+          const p2 = points[(i + 1) % 6];
+          const key = edgeKey(p1.x, p1.y, p2.x, p2.y);
+          if (!edges.has(key)) {
+            edges.set(key, { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
+          }
+        }
       }
     }
+
+    // Collect unique vertices from edges for dots style
+    const vertices = new Set();
+    for (const edge of edges.values()) {
+      vertices.add(`${edge.x1.toFixed(2)},${edge.y1.toFixed(2)}`);
+      vertices.add(`${edge.x2.toFixed(2)},${edge.y2.toFixed(2)}`);
+    }
+
+    // Second pass: draw edges or dots based on line style
+    if (lineStyle === 'dots') {
+      // Draw dots at each unique vertex
+      ctx.fillStyle = lineColor;
+      for (const vertexKey of vertices) {
+        const [x, y] = vertexKey.split(',').map(Number);
+        ctx.beginPath();
+        ctx.arc(x, y, lineThickness * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      // Draw edges
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = lineThickness;
+      if (lineStyle === 'dotted') {
+        ctx.setLineDash([3, 3]);
+      } else {
+        ctx.setLineDash([]);
+      }
+
+      ctx.beginPath();
+      for (const edge of edges.values()) {
+        ctx.moveTo(edge.x1, edge.y1);
+        ctx.lineTo(edge.x2, edge.y2);
+      }
+      ctx.stroke();
+    }
+
+    // Reset line dash for text
+    ctx.setLineDash([]);
 
     // Draw header/footer text
     ctx.fillStyle = '#333333';
@@ -172,7 +265,7 @@ export default function HexagonGraph() {
       ctx.textBaseline = 'bottom';
       ctx.fillText(footerBottomRight, pageWidth - PAGE_MARGIN, pageHeight - 12);
     }
-  }, [width, height, hexSize, orientation, pageWidth, pageHeight, headerTopLeft, headerTopRight, footerBottomLeft, footerBottomRight]);
+  }, [width, height, hexSize, orientation, pageWidth, pageHeight, headerTopLeft, headerTopRight, footerBottomLeft, footerBottomRight, lineStyle, lineColor, lineThickness, shadingEnabled, shadingColor, shadingPattern]);
 
   // Handle width change with bounds checking
   const handleWidthChange = (newWidth) => {
@@ -268,185 +361,371 @@ export default function HexagonGraph() {
 
             {/* Controls Panel - Hidden when printing */}
             <div className="lg:w-80 flex-shrink-0 print:hidden">
-              <div className="bg-bg rounded-lg border border-border p-6 space-y-6">
-                <h2 className="text-lg font-heading font-semibold text-text border-b border-border pb-2">
-                  Grid Settings
-                </h2>
-
-                {/* Width Control */}
-                <div>
-                  <label className="block text-sm font-medium text-text mb-2">
-                    Width: {width} hexagons
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="1"
-                      max={maxWidth}
-                      value={width}
-                      onChange={(e) => handleWidthChange(parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
-                    />
-                    <input
-                      type="number"
-                      min="1"
-                      max={maxWidth}
-                      value={width}
-                      onChange={(e) => handleWidthChange(parseInt(e.target.value) || 1)}
-                      className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
-                    />
-                  </div>
-                  <p className="text-xs text-muted mt-1">Max: {maxWidth}</p>
-                </div>
-
-                {/* Height Control */}
-                <div>
-                  <label className="block text-sm font-medium text-text mb-2">
-                    Height: {height} hexagons
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="1"
-                      max={maxHeight}
-                      value={height}
-                      onChange={(e) => handleHeightChange(parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
-                    />
-                    <input
-                      type="number"
-                      min="1"
-                      max={maxHeight}
-                      value={height}
-                      onChange={(e) => handleHeightChange(parseInt(e.target.value) || 1)}
-                      className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
-                    />
-                  </div>
-                  <p className="text-xs text-muted mt-1">Max: {maxHeight}</p>
-                </div>
-
-                {/* Hex Size Control */}
-                <div>
-                  <label className="block text-sm font-medium text-text mb-2">
-                    Hex Size: {hexSize} pixels
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="10"
-                      max="100"
-                      value={hexSize}
-                      onChange={(e) => handleHexSizeChange(parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
-                    />
-                    <input
-                      type="number"
-                      min="10"
-                      max="100"
-                      value={hexSize}
-                      onChange={(e) => handleHexSizeChange(parseInt(e.target.value) || 10)}
-                      className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Hex Orientation Control */}
-                <div>
-                  <label className="block text-sm font-medium text-text mb-2">
-                    Hex Orientation
-                  </label>
-                  <select
-                    value={orientation}
-                    onChange={(e) => handleOrientationChange(parseInt(e.target.value))}
-                    className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+              <div className="bg-bg rounded-lg border border-border p-4 space-y-4">
+                
+                {/* Grid Settings Section - Collapsible */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setGridSettingsOpen(!gridSettingsOpen)}
+                    className="w-full flex items-center justify-between p-3 bg-surface hover:bg-opacity-80 transition-colors"
                   >
-                    <option value={0}>0° (Flat Top)</option>
-                    <option value={90}>90° (Pointy Top)</option>
-                  </select>
+                    <h2 className="text-lg font-heading font-semibold text-text">
+                      Grid Settings
+                    </h2>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-5 w-5 text-muted transition-transform ${gridSettingsOpen ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {gridSettingsOpen && (
+                    <div className="p-4 space-y-4 border-t border-border">
+                      {/* Width Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Width: {width} hexagons
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="1"
+                            max={maxWidth}
+                            value={width}
+                            onChange={(e) => handleWidthChange(parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
+                          />
+                          <input
+                            type="number"
+                            min="1"
+                            max={maxWidth}
+                            value={width}
+                            onChange={(e) => handleWidthChange(parseInt(e.target.value) || 1)}
+                            className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                        <p className="text-xs text-muted mt-1">Max: {maxWidth}</p>
+                      </div>
+
+                      {/* Height Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Height: {height} hexagons
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="1"
+                            max={maxHeight}
+                            value={height}
+                            onChange={(e) => handleHeightChange(parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
+                          />
+                          <input
+                            type="number"
+                            min="1"
+                            max={maxHeight}
+                            value={height}
+                            onChange={(e) => handleHeightChange(parseInt(e.target.value) || 1)}
+                            className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                        <p className="text-xs text-muted mt-1">Max: {maxHeight}</p>
+                      </div>
+
+                      {/* Hex Size Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Hex Size: {hexSize} pixels
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="10"
+                            max="100"
+                            value={hexSize}
+                            onChange={(e) => handleHexSizeChange(parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
+                          />
+                          <input
+                            type="number"
+                            min="10"
+                            max="100"
+                            value={hexSize}
+                            onChange={(e) => handleHexSizeChange(parseInt(e.target.value) || 10)}
+                            className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Hex Orientation Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Hex Orientation
+                        </label>
+                        <select
+                          value={orientation}
+                          onChange={(e) => handleOrientationChange(parseInt(e.target.value))}
+                          className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                        >
+                          <option value={0}>0° (Flat Top)</option>
+                          <option value={90}>90° (Pointy Top)</option>
+                        </select>
+                      </div>
+
+                      {/* Page Orientation Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Page Orientation
+                        </label>
+                        <select
+                          value={pageOrientation}
+                          onChange={(e) => handlePageOrientationChange(e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                        >
+                          <option value="portrait">Portrait</option>
+                          <option value="landscape">Landscape</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Page Orientation Control */}
-                <div>
-                  <label className="block text-sm font-medium text-text mb-2">
-                    Page Orientation
-                  </label>
-                  <select
-                    value={pageOrientation}
-                    onChange={(e) => handlePageOrientationChange(e.target.value)}
-                    className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                {/* Styles Section - Collapsible */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setStylesOpen(!stylesOpen)}
+                    className="w-full flex items-center justify-between p-3 bg-surface hover:bg-opacity-80 transition-colors"
                   >
-                    <option value="portrait">Portrait</option>
-                    <option value="landscape">Landscape</option>
-                  </select>
+                    <h2 className="text-lg font-heading font-semibold text-text">
+                      Styles
+                    </h2>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-5 w-5 text-muted transition-transform ${stylesOpen ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {stylesOpen && (
+                    <div className="p-4 space-y-4 border-t border-border">
+                      {/* Line Style Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Line Style
+                        </label>
+                        <select
+                          value={lineStyle}
+                          onChange={(e) => setLineStyle(e.target.value)}
+                          className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                        >
+                          <option value="solid">Solid</option>
+                          <option value="dotted">Dotted</option>
+                          <option value="dots">Dots at Intersections</option>
+                        </select>
+                      </div>
+
+                      {/* Line Color Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Line Color
+                        </label>
+                        <div className="flex items-center gap-2">
+                          {greyscalePresets.map((preset) => (
+                            <button
+                              key={preset.value}
+                              onClick={() => setLineColor(preset.value)}
+                              className={`w-8 h-8 rounded border-2 transition-all ${
+                                lineColor === preset.value
+                                  ? 'border-accent ring-2 ring-accent ring-offset-1'
+                                  : 'border-border hover:border-muted'
+                              }`}
+                              style={{ backgroundColor: preset.value }}
+                              title={preset.name}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Line Thickness Control */}
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Line Thickness: {lineThickness}px
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            value={lineThickness}
+                            onChange={(e) => setLineThickness(parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-accent"
+                          />
+                          <input
+                            type="number"
+                            min="1"
+                            max="5"
+                            value={lineThickness}
+                            onChange={(e) => setLineThickness(Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))}
+                            className="w-16 p-2 text-center border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Shading Enable */}
+                      <div>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={shadingEnabled}
+                            onChange={(e) => {
+                              setShadingEnabled(e.target.checked);
+                              if (e.target.checked && shadingPattern === 'none') {
+                                setShadingPattern('all');
+                              }
+                            }}
+                            className="w-5 h-5 rounded border-border text-accent focus:ring-accent"
+                          />
+                          <span className="text-sm font-medium text-text">Enable Cell Shading</span>
+                        </label>
+                      </div>
+
+                      {/* Shading Options - Only shown when enabled */}
+                      {shadingEnabled && (
+                        <>
+                          {/* Shading Color */}
+                          <div>
+                            <label className="block text-sm font-medium text-text mb-2">
+                              Shading Color
+                            </label>
+                            <div className="flex items-center gap-2">
+                              {greyscalePresets.map((preset) => (
+                                <button
+                                  key={preset.value}
+                                  onClick={() => setShadingColor(preset.value)}
+                                  className={`w-8 h-8 rounded border-2 transition-all ${
+                                    shadingColor === preset.value
+                                      ? 'border-accent ring-2 ring-accent ring-offset-1'
+                                      : 'border-border hover:border-muted'
+                                  }`}
+                                  style={{ backgroundColor: preset.value }}
+                                  title={preset.name}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Shading Pattern */}
+                          <div>
+                            <label className="block text-sm font-medium text-text mb-2">
+                              Shading Pattern
+                            </label>
+                            <select
+                              value={shadingPattern}
+                              onChange={(e) => setShadingPattern(e.target.value)}
+                              className="w-full p-3 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                            >
+                              <option value="none">None</option>
+                              <option value="all">All Cells</option>
+                              <option value="every-other-row">Every Other Row</option>
+                              <option value="every-other-col">Every Other Column</option>
+                              <option value="every-third-row">Every Third Row</option>
+                              <option value="every-third-col">Every Third Column</option>
+                            </select>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Divider */}
-                <hr className="border-border" />
-
-                <h2 className="text-lg font-heading font-semibold text-text border-b border-border pb-2">
-                  Header &amp; Footer
-                </h2>
-
-                {/* Header/Footer Inputs */}
-                <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-text mb-2">
-                        Header - Top Left
-                      </label>
-                      <input
-                        type="text"
-                        value={headerTopLeft}
-                        onChange={(e) => setHeaderTopLeft(e.target.value)}
-                        placeholder="e.g., Title"
-                        className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
-                      />
+                {/* Header & Footer Section - Collapsible */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setHeaderFooterOpen(!headerFooterOpen)}
+                    className="w-full flex items-center justify-between p-3 bg-surface hover:bg-opacity-80 transition-colors"
+                  >
+                    <h2 className="text-lg font-heading font-semibold text-text">
+                      Header &amp; Footer
+                    </h2>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-5 w-5 text-muted transition-transform ${headerFooterOpen ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {headerFooterOpen && (
+                    <div className="p-4 space-y-4 border-t border-border">
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Header - Top Left
+                        </label>
+                        <input
+                          type="text"
+                          value={headerTopLeft}
+                          onChange={(e) => setHeaderTopLeft(e.target.value)}
+                          placeholder="e.g., Title"
+                          className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Header - Top Right
+                        </label>
+                        <input
+                          type="text"
+                          value={headerTopRight}
+                          onChange={(e) => setHeaderTopRight(e.target.value)}
+                          placeholder="e.g., Date"
+                          className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Footer - Bottom Left
+                        </label>
+                        <input
+                          type="text"
+                          value={footerBottomLeft}
+                          onChange={(e) => setFooterBottomLeft(e.target.value)}
+                          placeholder="e.g., Notes"
+                          className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-text mb-2">
+                          Footer - Bottom Right
+                        </label>
+                        <input
+                          type="text"
+                          value={footerBottomRight}
+                          onChange={(e) => setFooterBottomRight(e.target.value)}
+                          placeholder="e.g., Page 1"
+                          className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+                        />
+                      </div>
                     </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-text mb-2">
-                        Header - Top Right
-                      </label>
-                      <input
-                        type="text"
-                        value={headerTopRight}
-                        onChange={(e) => setHeaderTopRight(e.target.value)}
-                        placeholder="e.g., Date"
-                        className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-text mb-2">
-                        Footer - Bottom Left
-                      </label>
-                      <input
-                        type="text"
-                        value={footerBottomLeft}
-                        onChange={(e) => setFooterBottomLeft(e.target.value)}
-                        placeholder="e.g., Notes"
-                        className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-text mb-2">
-                        Footer - Bottom Right
-                      </label>
-                      <input
-                        type="text"
-                        value={footerBottomRight}
-                        onChange={(e) => setFooterBottomRight(e.target.value)}
-                        placeholder="e.g., Page 1"
-                        className="w-full p-2 border border-border rounded-lg bg-surface text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
-                      />
-                    </div>
-                  </div>
+                  )}
+                </div>
 
-                {/* Divider */}
-                <hr className="border-border" />
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
+                {/* Print Button - Always visible */}
+                <div className="pt-2">
                   <button
                     onClick={handlePrint}
                     className="w-full bg-accent text-white px-6 py-3 rounded-lg hover:opacity-90 flex items-center justify-center gap-2 font-medium"
