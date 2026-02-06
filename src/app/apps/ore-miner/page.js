@@ -6,6 +6,7 @@ import Header from '../../../components/Header';
 
 export default function OreMiner() {
   const [oreCount, setOreCount] = useState(0);
+  const [totalOreCount, setTotalOreCount] = useState(0);
   const [clickCount, setClickCount] = useState(0);
   const [currentPickIndex, setCurrentPickIndex] = useState(0);
   const [autoMinerCount, setAutoMinerCount] = useState(0);
@@ -21,6 +22,7 @@ export default function OreMiner() {
     if (typeof window !== 'undefined') {
       const gameState = {
         oreCount,
+        totalOreCount,
         clickCount,
         currentPickIndex,
         autoMinerCount,
@@ -41,6 +43,7 @@ export default function OreMiner() {
       if (savedState) {
         const gameState = JSON.parse(savedState);
         setOreCount(gameState.oreCount || 0);
+        setTotalOreCount(gameState.totalOreCount || 0);
         setClickCount(gameState.clickCount || 0);
         setCurrentPickIndex(gameState.currentPickIndex || 0);
         setAutoMinerCount(gameState.autoMinerCount || 0);
@@ -61,6 +64,7 @@ export default function OreMiner() {
     
     if (confirmed) {
       setOreCount(0);
+      setTotalOreCount(0);
       setClickCount(0);
       setCurrentPickIndex(0);
       setAutoMinerCount(0);
@@ -115,6 +119,7 @@ export default function OreMiner() {
   const mineOre = () => {
     setClickCount(prev => prev + 1);
     setOreCount(prev => prev + currentPick.efficiency);
+    setTotalOreCount(prev => prev + currentPick.efficiency);
   };
 
   const buyUpgrade = () => {
@@ -208,6 +213,7 @@ export default function OreMiner() {
     if (totalPassiveIncome > 0) {
       const interval = setInterval(() => {
         setOreCount(prev => prev + totalPassiveIncome);
+        setTotalOreCount(prev => prev + totalPassiveIncome);
       }, 1000);
       return () => clearInterval(interval);
     }
@@ -230,7 +236,7 @@ export default function OreMiner() {
   // Save game state whenever it changes
   useEffect(() => {
     saveGameState();
-  }, [oreCount, clickCount, currentPickIndex, autoMinerCount, excavatorCount, excavatorUpgradeIndex, drillingRigCount, drillingRigUpgradeIndex, blastingCrewCount, blastingCrewUpgradeIndex]);
+  }, [oreCount, totalOreCount, clickCount, currentPickIndex, autoMinerCount, excavatorCount, excavatorUpgradeIndex, drillingRigCount, drillingRigUpgradeIndex, blastingCrewCount, blastingCrewUpgradeIndex]);
 
   return (
     <main className="min-h-screen bg-bg text-text">
@@ -252,15 +258,21 @@ export default function OreMiner() {
           {/* Ore Counter */}
           <div className="text-center mb-8">
             <div className="bg-bg p-8 rounded-2xl shadow-sm border border-border">
-              <h2 className="text-2xl font-semibold text-text mb-4">Ore Collected</h2>
+              <h2 className="text-2xl font-semibold text-text mb-4">Current Ore</h2>
               <div className="text-6xl font-bold text-accent mb-2">
                 {oreCount.toLocaleString()}
               </div>
-              <p className="text-muted">
-                {oreCount === 0 ? 'No ore collected yet' : 
-                 oreCount === 1 ? '1 piece of ore' : 
-                 `${oreCount.toLocaleString()} pieces of ore`}
+              <p className="text-muted mb-4">
+                {oreCount === 0 ? 'No ore available' : 
+                 oreCount === 1 ? 'piece of ore' : 
+                 `pieces of ore`}
               </p>
+              <div className="border-t border-border pt-4 mt-4">
+                <h3 className="text-lg font-semibold text-text mb-2">Total Ore Mined</h3>
+                <div className="text-3xl font-bold text-muted">
+                  {totalOreCount.toLocaleString()}
+                </div>
+              </div>
             </div>
           </div>
 
