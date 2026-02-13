@@ -201,6 +201,28 @@ setLoading(true)
 - Use `'use client'` only when necessary
 - Import only what you need
 
+### **RULE 18: Lint Validation — MANDATORY**
+**Always run `npm run lint` before considering any work complete.** The production build (`next build`) will fail on lint errors, so catching them locally is essential.
+
+```bash
+# ✅ Run this after every change
+npm run lint
+```
+
+Common Next.js lint pitfalls to avoid:
+- **Do not use `module` as a variable name** — `@next/next/no-assign-module-variable` forbids it. Use descriptive names like `gameModule`, `loadedModule`, etc.
+- **Do not use `<img>` tags** — use `next/image` instead (`@next/next/no-img-element`).
+- **Do not add `<link>` fonts outside of `layout.js`** — use `next/font` or the root layout (`@next/next/no-page-custom-font`).
+- **Include all dependencies in React hook dependency arrays** — `react-hooks/exhaustive-deps` will warn otherwise.
+
+```javascript
+// ❌ WRONG — 'module' is reserved by Next.js
+const module = await import('./something');
+
+// ✅ CORRECT — use a descriptive name
+const loadedPlugin = await import('./something');
+```
+
 ## ✅ Quick Checklist for New Apps
 
 Before submitting any new app, verify:
@@ -216,6 +238,7 @@ Before submitting any new app, verify:
 - [ ] Uses responsive design classes
 - [ ] Handles loading and error states
 - [ ] Mobile-friendly interface
+- [ ] **Passes `npm run lint` with no errors** (see Rule 18)
 
 ## 🔄 When Updating Existing Apps
 

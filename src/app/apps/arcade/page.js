@@ -254,8 +254,8 @@ function GameView({ gameId, player, onBack, onScorePosted }) {
       const loader = gameLoaders[gameId];
       if (!loader || !canvasRef.current) return;
 
-      const module = await loader();
-      const GameClass = module.default;
+      const gameModule = await loader();
+      const GameClass = gameModule.default;
       if (!mounted) return;
 
       const maxWidth = Math.min(window.innerWidth - 40, 760);
