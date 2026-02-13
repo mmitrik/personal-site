@@ -48,7 +48,7 @@ a:not(.btn):not(.btn-outline):not(.header-logo):hover {
 
 /* Header logo link styles */
 a.header-logo {
-  color: var(--color-text);
+  color: inherit;
   font-weight: 700;
   transition: color 0.15s ease-in-out;
 }

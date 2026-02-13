@@ -42,6 +42,11 @@ const projects = [
         description: "A classic text-based adventure game with a retro terminal interface. Explore different areas, collect items, and interact with objects using traditional commands like 'look', 'go', and 'take'.",
         link: "/apps/text-adventure",
     },
+    {
+        title: "Retro Arcade",
+        description: "A collection of six classic arcade games — Pong, Snake, Tetris, Space Invaders, Pac-Man, and Asteroids — rendered on HTML5 Canvas with retro CRT effects, persistent high scores, and a neon arcade theme.",
+        link: "/apps/arcade",
+    },
 ];
 
 export default function ProjectsPage() {
